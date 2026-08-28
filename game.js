@@ -131,14 +131,14 @@ function startBackgroundMusic(){
   if(ctx.state === 'suspended') ctx.resume();
 
   const master = ctx.createGain();
-  master.gain.value = 0.35;
+  master.gain.value = 0.55;
   master.connect(ctx.destination);
 
   // Drone pad: two long oscillators for ambience
   const pad1 = ctx.createOscillator(); pad1.type='sine'; pad1.frequency.value=196;
-  const pad1g = ctx.createGain(); pad1g.gain.value=0.04;
+  const pad1g = ctx.createGain(); pad1g.gain.value=0.09;
   const pad2 = ctx.createOscillator(); pad2.type='sine'; pad2.frequency.value=246.94;
-  const pad2g = ctx.createGain(); pad2g.gain.value=0.03;
+  const pad2g = ctx.createGain(); pad2g.gain.value=0.07;
   pad1.connect(pad1g); pad1g.connect(master);
   pad2.connect(pad2g); pad2g.connect(master);
   pad1.start(); pad2.start();
@@ -150,14 +150,14 @@ function startBackgroundMusic(){
     if(state.muted || !bgmNodes) return;
     if(lastMelody){ try{ lastMelody.o.stop(); }catch(e){} }
     const freq = BGM_NOTES[step % BGM_NOTES.length];
-    const o = ctx.createOscillator(); o.type='sine'; o.frequency.value=freq;
-    const g = ctx.createGain(); g.gain.value=0.12;
+    const o = ctx.createOscillator(); o.type='triangle'; o.frequency.value=freq;
+    const g = ctx.createGain(); g.gain.value=0.22;
     o.connect(g); g.connect(master);
     const t = ctx.currentTime;
     g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(0.12, t+0.05);
-    g.gain.exponentialRampToValueAtTime(0.001, t+0.5);
-    o.start(t); o.stop(t+0.55);
+    g.gain.linearRampToValueAtTime(0.22, t+0.05);
+    g.gain.exponentialRampToValueAtTime(0.001, t+0.55);
+    o.start(t); o.stop(t+0.6);
     lastMelody = {o};
     step++;
   }
