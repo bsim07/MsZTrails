@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12">
+  <!-- Pixel-art tree, 12x12 grid, transparent background -->
+  <!-- Row 1: narrow top cap -->
+  <rect x="3" y="1" width="6" height="1" fill="#1A3C08"/>
+  <!-- Row 2: widens -->
+  <rect x="1" y="2" width="2" height="1" fill="#1A3C08"/>
+  <rect x="3" y="2" width="2" height="1" fill="#2E6C10"/>
+  <rect x="5" y="2" width="2" height="1" fill="#4E9018"/>
+  <rect x="7" y="2" width="2" height="1" fill="#2E6C10"/>
+  <rect x="9" y="2" width="2" height="1" fill="#1A3C08"/>
+  <!-- Row 3: full width, bright zone starts -->
+  <rect x="0" y="3" width="1" height="1" fill="#1A3C08"/>
+  <rect x="1" y="3" width="1" height="1" fill="#2E6C10"/>
+  <rect x="2" y="3" width="2" height="1" fill="#4E9018"/>
+  <rect x="4" y="3" width="1" height="1" fill="#70B224"/>
+  <rect x="5" y="3" width="2" height="1" fill="#9CD040"/>
+  <rect x="7" y="3" width="1" height="1" fill="#70B224"/>
+  <rect x="8" y="3" width="2" height="1" fill="#4E9018"/>
+  <rect x="10" y="3" width="1" height="1" fill="#2E6C10"/>
+  <rect x="11" y="3" width="1" height="1" fill="#1A3C08"/>
+  <!-- Row 4: peak highlight -->
+  <rect x="0" y="4" width="1" height="1" fill="#1A3C08"/>
+  <rect x="1" y="4" width="1" height="1" fill="#2E6C10"/>
+  <rect x="2" y="4" width="1" height="1" fill="#4E9018"/>
+  <rect x="3" y="4" width="1" height="1" fill="#70B224"/>
+  <rect x="4" y="4" width="1" height="1" fill="#9CD040"/>
+  <rect x="5" y="4" width="2" height="1" fill="#C4EC68"/>
+  <rect x="7" y="4" width="1" height="1" fill="#9CD040"/>
+  <rect x="8" y="4" width="1" height="1" fill="#70B224"/>
+  <rect x="9" y="4" width="1" height="1" fill="#4E9018"/>
+  <rect x="10" y="4" width="1" height="1" fill="#2E6C10"/>
+  <rect x="11" y="4" width="1" height="1" fill="#1A3C08"/>
+  <!-- Row 5: mirror of row 3 -->
+  <rect x="0" y="5" width="1" height="1" fill="#1A3C08"/>
+  <rect x="1" y="5" width="1" height="1" fill="#2E6C10"/>
+  <rect x="2" y="5" width="2" height="1" fill="#4E9018"/>
+  <rect x="4" y="5" width="1" height="1" fill="#70B224"/>
+  <rect x="5" y="5" width="2" height="1" fill="#9CD040"/>
+  <rect x="7" y="5" width="1" height="1" fill="#70B224"/>
+  <rect x="8" y="5" width="2" height="1" fill="#4E9018"/>
+  <rect x="10" y="5" width="1" height="1" fill="#2E6C10"/>
+  <rect x="11" y="5" width="1" height="1" fill="#1A3C08"/>
+  <!-- Row 6: stepping down -->
+  <rect x="0" y="6" width="1" height="1" fill="#1A3C08"/>
+  <rect x="1" y="6" width="2" height="1" fill="#2E6C10"/>
+  <rect x="3" y="6" width="2" height="1" fill="#4E9018"/>
+  <rect x="5" y="6" width="2" height="1" fill="#70B224"/>
+  <rect x="7" y="6" width="2" height="1" fill="#4E9018"/>
+  <rect x="9" y="6" width="2" height="1" fill="#2E6C10"/>
+  <rect x="11" y="6" width="1" height="1" fill="#1A3C08"/>
+  <!-- Row 7: lower middle -->
+  <rect x="0" y="7" width="1" height="1" fill="#1A3C08"/>
+  <rect x="1" y="7" width="3" height="1" fill="#2E6C10"/>
+  <rect x="4" y="7" width="4" height="1" fill="#4E9018"/>
+  <rect x="8" y="7" width="3" height="1" fill="#2E6C10"/>
+  <rect x="11" y="7" width="1" height="1" fill="#1A3C08"/>
+  <!-- Row 8: dark lower body -->
+  <rect x="0" y="8" width="1" height="1" fill="#1A3C08"/>
+  <rect x="1" y="8" width="10" height="1" fill="#2E6C10"/>
+  <rect x="11" y="8" width="1" height="1" fill="#1A3C08"/>
+  <!-- Row 9: narrowing -->
+  <rect x="1" y="9" width="2" height="1" fill="#1A3C08"/>
+  <rect x="3" y="9" width="6" height="1" fill="#2E6C10"/>
+  <rect x="9" y="9" width="2" height="1" fill="#1A3C08"/>
+  <!-- Row 10: bottom cap -->
+  <rect x="2" y="10" width="8" height="1" fill="#1A3C08"/>
+</svg>

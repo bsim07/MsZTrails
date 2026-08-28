@@ -1,0 +1,2545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fraction Trails — Moved</title>
+<meta http-equiv="refresh" content="0; url=index.html">
+<script>window.location.replace('index.html');</script>
+</head>
+<body>
+<p>Fraction Trails has moved to <a href="index.html">index.html</a>.</p>
+</body>
+</html>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --grass-1:#7CB947;
+    --grass-2:#8FCB57;
+    --path:#EAD9A6;
+    --sky:#BFE8F5;
+    --bark:#7A5230;
+    --leaf-dark:#3E7A34;
+    --ink:#2A3B2A;
+    --cream:#FFF8EB;
+    --gold:#FFC94D;
+    --coral:#FF6F59;
+    --shadow:rgba(42,59,42,0.25);
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;overscroll-behavior:none;}
+  body{
+    font-family:'Nunito',sans-serif;
+    background:linear-gradient(180deg,var(--sky) 0%, #E4F4E0 45%, #DCEFD8 100%);
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    min-height:100dvh;
+    padding:14px;
+    padding-top:max(14px, env(safe-area-inset-top));
+    padding-bottom:max(14px, env(safe-area-inset-bottom));
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+    overscroll-behavior:none;
+  }
+  h1,h2,h3,.display{font-family:'Baloo 2',cursive;}
+  button{font-family:'Nunito',sans-serif;cursor:pointer;touch-action:manipulation;}
+  .hidden{display:none !important;}
+
+  /* ---------- App shell ---------- */
+  #app{
+    width:100%;
+    max-width:620px;
+    background:var(--cream);
+    border-radius:24px;
+    box-shadow:0 18px 40px var(--shadow), 0 2px 0 rgba(255,255,255,0.6) inset;
+    overflow:hidden;
+    border:4px solid #ffffffaa;
+    position:relative;
+  }
+
+  /* ---------- Title screen ---------- */
+  #screen-title{
+    background:
+      radial-gradient(circle at 20% 15%, #ffffff55, transparent 40%),
+      linear-gradient(180deg,#8FCB57 0%, #5FA23B 100%);
+    padding:38px 26px 30px;
+    text-align:center;
+    color:#fff;
+  }
+  #screen-title .badge{
+    display:inline-block;
+    background:var(--gold);
+    color:#5B3A00;
+    font-family:'Baloo 2';
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:0.06em;
+    padding:5px 14px;
+    border-radius:999px;
+    margin-bottom:14px;
+    text-transform:uppercase;
+    box-shadow:0 3px 0 #C9932A;
+  }
+  #screen-title h1{
+    font-size:2.5em;
+    margin:0 0 6px;
+    text-shadow:0 3px 0 #3E7A2A, 0 5px 10px rgba(0,0,0,0.15);
+    line-height:1.05;
+  }
+  #screen-title p{
+    max-width:420px;
+    margin:0 auto 20px;
+    font-weight:700;
+    color:#F3FFE9;
+    line-height:1.5;
+    font-size:0.98em;
+  }
+  .title-critters{
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    margin:18px 0 22px;
+  }
+  .title-critters .mini-pie{width:48px;height:48px;}
+  #startBtn{
+    background:var(--coral);
+    color:#fff;
+    border:none;
+    font-family:'Baloo 2';
+    font-weight:700;
+    font-size:1.15em;
+    padding:14px 36px;
+    border-radius:999px;
+    box-shadow:0 5px 0 #C94733, 0 8px 16px rgba(0,0,0,0.2);
+    transition:transform .1s;
+  }
+  #startBtn:active{transform:translateY(4px);box-shadow:0 1px 0 #C94733;}
+  .focus-pill{
+    background:rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.35);
+    color:#fff;font-family:'Nunito';font-weight:800;font-size:0.78em;
+    padding:8px 14px;border-radius:999px;transition:all .15s;
+  }
+  .focus-pill.selected{background:var(--gold);border-color:var(--gold);color:#5B3A00;}
+  #nameInput{
+    font-family:'Nunito';font-weight:800;font-size:16px;
+    padding:10px 16px;border-radius:999px;border:none;
+    width:220px;max-width:70%;text-align:center;margin-bottom:14px;
+    box-shadow:0 3px 8px rgba(0,0,0,0.15) inset;
+    color:#2A3B2A;
+  }
+  #teacherLinkBtn{
+    display:block;margin:18px auto 0;background:none;border:none;
+    color:#F3FFE9;text-decoration:underline;font-weight:700;font-size:0.78em;
+    opacity:0.85;font-family:'Nunito';
+  }
+  .teacher-link{cursor:pointer;}
+  .howto{
+    margin-top:22px;
+    background:rgba(255,255,255,0.18);
+    border-radius:14px;
+    padding:14px 16px;
+    text-align:left;
+    font-size:0.88em;
+    line-height:1.6;
+    font-weight:600;
+  }
+  .howto b{color:var(--gold);}
+
+  /* ---------- Top bar ---------- */
+  #topbar{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    padding:10px 14px;
+    background:linear-gradient(180deg,#5FA23B,#4C8A2E);
+    color:#fff;
+  }
+  .topbar-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  #topbar .tb-title{font-family:'Baloo 2';font-weight:700;font-size:1.05em;}
+  #progressWrap{
+    display:flex;align-items:center;gap:8px;font-weight:800;font-size:0.85em;
+  }
+  #progressBarOuter{
+    width:80px;height:10px;background:rgba(255,255,255,0.35);border-radius:99px;overflow:hidden;
+  }
+  #progressBarInner{height:100%;background:var(--gold);width:0%;transition:width .4s;}
+  #journalBtn{
+    background:var(--gold);
+    border:none;color:#5B3A00;
+    font-family:'Baloo 2';font-weight:700;
+    padding:9px 14px;border-radius:999px;font-size:0.85em;
+    box-shadow:0 3px 0 #C9932A;
+    min-height:38px;
+  }
+  #journalBtn:active{transform:translateY(2px);box-shadow:none;}
+  #streakWrap{
+    font-family:'Baloo 2';font-weight:700;font-size:0.9em;
+    background:rgba(255,255,255,0.18);padding:6px 10px;border-radius:999px;
+  }
+  #muteBtn{
+    background:rgba(255,255,255,0.18);border:none;color:#fff;
+    border-radius:999px;width:42px;height:42px;font-size:1.05em;
+    flex-shrink:0;
+  }
+  #exportBtn{
+    background:rgba(255,255,255,0.18);border:none;color:#fff;
+    border-radius:999px;width:42px;height:42px;font-size:1.05em;
+    flex-shrink:0;
+  }
+
+  /* ---------- Map ---------- */
+  #mapWrap{
+    padding:14px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    background:#DCEFD8;
+  }
+  #mapGrid{
+    position:relative;
+    display:grid;
+    grid-template-columns:repeat(12, 1fr);
+    width:100%;
+    max-width:480px;
+    aspect-ratio:12/8;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 4px 14px rgba(0,0,0,0.15) inset, 0 2px 0 #fff;
+    border:3px solid #4C8A2E;
+    touch-action:none;
+  }
+  .tile{position:relative;}
+  .t-tree{background:var(--leaf-dark);}
+  .t-tree::after{
+    content:"";position:absolute;inset:15%;
+    background:radial-gradient(circle at 35% 30%, #4f9440, #2c5522);
+    border-radius:50%;
+    box-shadow:0 2px 3px rgba(0,0,0,0.25);
+  }
+  .t-path{background:repeating-linear-gradient(45deg, var(--grass-1) 0 10px, var(--grass-2) 10px 20px);}
+  .t-grass{
+    background:repeating-linear-gradient(45deg, #5C9E38 0 10px, #6FB33F 10px 20px);
+    overflow:visible;
+    z-index:1;
+  }
+  .t-grass::before{
+    /* grounding shadow so blades look rooted, not floating */
+    content:"";position:absolute;left:12%;right:12%;bottom:6%;height:26%;
+    background:radial-gradient(ellipse at center, rgba(10,25,5,0.35), transparent 72%);
+    z-index:4;
+  }
+  .blade-cluster{
+    position:absolute;left:0;right:0;bottom:2%;height:210%;
+    z-index:6;pointer-events:none;
+  }
+  .blade{
+    position:absolute;bottom:0;width:15%;
+    border-radius:50% 50% 10% 10% / 70% 70% 10% 10%;
+    box-shadow:1px 0 2px rgba(0,20,0,0.25);
+    transform:rotate(var(--r,0deg));
+    transform-origin:bottom center;
+    animation:swayBlade 2.8s ease-in-out infinite;
+    animation-delay:var(--ad,0s);
+  }
+  .blade.b-l{background:linear-gradient(180deg,#A6E36F 0%, #6FB33F 75%, #57922F 100%);}
+  .blade.b-d{background:linear-gradient(180deg,#82C24E 0%, #4C8A2E 75%, #3B6E22 100%);}
+  @keyframes swayBlade{
+    0%,100%{transform:rotate(var(--r,0deg));}
+    50%{transform:rotate(calc(var(--r,0deg) + 7deg));}
+  }
+  .grass-star{
+    position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+    font-size:60%;z-index:6;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+  }
+  .t-grass.caught{background:repeating-linear-gradient(45deg, var(--grass-1) 0 10px, var(--grass-2) 10px 20px);}
+  .t-grass.caught::before{display:none;}
+  .t-grass.caught .blade-cluster{display:none;}
+  .t-grass.caught .grass-star{display:flex;}
+  .t-grass.checked-empty{background:repeating-linear-gradient(45deg, #C9BB8E 0 10px, #D8CBA0 10px 20px);}
+  .t-grass.checked-empty::before{display:none;}
+  .t-grass.checked-empty .blade-cluster{display:none;}
+  .t-grass.checked-empty .grass-star{display:none;}
+  .t-grass.near::after{
+    content:"";position:absolute;inset:-3px;
+    border:3px solid rgba(255,201,77,0.85);border-radius:8px;
+    pointer-events:none;z-index:7;
+    animation:nearRing 1.1s ease-in-out infinite;
+  }
+  @keyframes nearRing{0%,100%{opacity:0.35;transform:scale(1);}50%{opacity:0.95;transform:scale(1.06);}}
+  .t-grass.hint-glow{ animation:hintPulse 1.1s ease-in-out infinite; z-index:3; }
+  @keyframes hintPulse{
+    0%,100%{ box-shadow: inset 0 0 0px 0px rgba(255,201,77,0); }
+    50%{ box-shadow: inset 0 0 0 3px rgba(255,201,77,0.95), 0 0 14px 4px rgba(255,201,77,0.8); }
+  }
+  .t-guide{background:repeating-linear-gradient(45deg, var(--grass-1) 0 10px, var(--grass-2) 10px 20px);}
+  .t-guide::after{
+    content:"🧙";
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:75%;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+  }
+  .t-trainer{background:repeating-linear-gradient(45deg, var(--grass-1) 0 10px, var(--grass-2) 10px 20px);}
+  .t-trainer::after{
+    content:"🥋";
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:75%;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+  }
+  .t-trainer.beaten::after{content:"🏅";}
+
+  #player{
+    position:absolute;
+    display:flex;align-items:center;justify-content:center;
+    font-size:75%;
+    transition:left .14s linear, top .14s linear;
+    filter:drop-shadow(0 2px 2px rgba(0,0,0,0.35));
+    z-index:5;
+  }
+  #player .sprite{animation:bob 0.6s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
+
+  #mapHint{
+    margin-top:10px;
+    font-size:0.82em;
+    font-weight:700;
+    color:#3E5A34;
+    text-align:center;
+    max-width:440px;
+    line-height:1.5;
+  }
+
+  /* D-pad */
+  #dpad{
+    margin-top:14px;
+    display:grid;
+    grid-template-columns:repeat(3,52px);
+    grid-template-rows:repeat(3,52px);
+    gap:6px;
+  }
+  #dpad button{
+    background:#fff;
+    border:2px solid #4C8A2E;
+    border-radius:12px;
+    font-size:1.3em;
+    color:#4C8A2E;
+    box-shadow:0 3px 0 #cfe3c9;
+  }
+  #dpad button:active{transform:translateY(2px);box-shadow:none;}
+  #dpad .up{grid-column:2;grid-row:1;}
+  #dpad .left{grid-column:1;grid-row:2;}
+  #dpad .center{grid-column:2;grid-row:2;visibility:hidden;}
+  #dpad .right{grid-column:3;grid-row:2;}
+  #dpad .down{grid-column:2;grid-row:3;}
+
+  /* ---------- Modal shared ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(20,30,15,0.55);
+    display:flex;align-items:center;justify-content:center;
+    z-index:100;
+    padding:16px;
+  }
+  .modal-card{
+    background:var(--cream);
+    border-radius:20px;
+    width:100%;max-width:460px;
+    max-height:90vh;
+    overflow-y:auto;
+    box-shadow:0 20px 40px rgba(0,0,0,0.35);
+    position:relative;
+    animation:popIn .25s ease;
+  }
+  @keyframes popIn{from{transform:scale(0.85);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .modal-close{
+    position:absolute;top:10px;right:12px;
+    background:none;border:none;font-size:1.3em;color:#8a8a8a;
+    line-height:1;z-index:2;
+  }
+
+  /* ---------- Dialog (trail guide) ---------- */
+  .dialog-head{
+    background:linear-gradient(180deg,#FFD877,#FFC94D);
+    padding:16px 20px;
+    display:flex;align-items:center;gap:10px;
+    border-radius:20px 20px 0 0;
+  }
+  .dialog-head .avatar{font-size:2em;}
+  .dialog-head .name{font-family:'Baloo 2';font-weight:700;color:#5B3A00;}
+  .dialog-body{padding:18px 20px 22px;font-weight:700;line-height:1.6;color:#3E2C10;}
+  .dialog-body .bubble{
+    background:#fff;border-radius:14px;padding:14px;border:2px dashed #FFC94D;
+  }
+  .dialog-foot{padding:0 20px 20px;text-align:right;}
+  .btn-primary{
+    background:var(--coral);color:#fff;border:none;font-family:'Baloo 2';font-weight:700;
+    padding:10px 22px;border-radius:999px;box-shadow:0 4px 0 #C94733;font-size:0.95em;
+  }
+  .btn-primary:active{transform:translateY(3px);box-shadow:none;}
+  .btn-secondary{
+    background:#fff;color:var(--leaf-dark);border:2px solid var(--leaf-dark);font-family:'Baloo 2';font-weight:700;
+    padding:9px 20px;border-radius:999px;font-size:0.9em;
+  }
+
+  /* ---------- Battle ---------- */
+  .battle-head{
+    background:linear-gradient(180deg,#7BC1EE,#4E9FDA);
+    color:#fff;padding:16px 20px 40px;
+    border-radius:20px 20px 0 0;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .battle-head::before{
+    content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0 20px, transparent 20px 40px);
+  }
+  .battle-head h3{margin:0 0 2px;font-size:1.1em;position:relative;}
+  .battle-head .sub{font-size:0.8em;font-weight:700;opacity:0.9;position:relative;}
+  .creature-stage{
+    margin:-32px auto 0;
+    position:relative;
+    display:flex;flex-direction:column;align-items:center;
+    z-index:2;
+  }
+  .pie{
+    width:110px;height:110px;border-radius:50%;
+    border:5px solid #fff;
+    box-shadow:0 8px 16px rgba(0,0,0,0.25);
+    position:relative;
+    animation:idle 2.6s ease-in-out infinite;
+  }
+  @keyframes idle{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-6px) rotate(-2deg);}}
+  .pie.hit{animation:hit .4s ease;}
+  @keyframes hit{0%{transform:translateX(0);}20%{transform:translateX(-8px);}40%{transform:translateX(8px);}60%{transform:translateX(-6px);}80%{transform:translateX(6px);}100%{transform:translateX(0);}}
+  .pie.faint{animation:faint .8s ease forwards;}
+  @keyframes faint{to{transform:scale(0) rotate(30deg);opacity:0;}}
+  .pie .eye{
+    position:absolute;top:38%;width:11px;height:14px;background:#2A2A2A;border-radius:50%;
+  }
+  .pie .eye.l{left:32%;} .pie .eye.r{right:32%;}
+  .pie .eye::after{content:"";position:absolute;top:2px;left:2px;width:4px;height:4px;background:#fff;border-radius:50%;}
+  .pie .mouth{
+    position:absolute;bottom:26%;left:50%;transform:translateX(-50%);
+    width:26px;height:13px;border-bottom:4px solid #2A2A2A;border-radius:0 0 20px 20px;
+  }
+  .pie .ear{
+    position:absolute;top:-14px;width:0;height:0;
+    border-left:10px solid transparent;border-right:10px solid transparent;
+    border-bottom:20px solid var(--ear-color, #999);
+  }
+  .pie .ear.l{left:8px;transform:rotate(-18deg);}
+  .pie .ear.r{right:8px;transform:rotate(18deg);}
+  .creature-name{font-family:'Baloo 2';font-weight:700;margin-top:8px;font-size:1.05em;color:#274A66;}
+  .creature-tag{font-size:0.72em;font-weight:800;color:#5B7F99;text-transform:uppercase;letter-spacing:0.04em;}
+  .hp-wrap{width:140px;height:8px;background:#e2e2e2;border-radius:99px;margin-top:8px;overflow:hidden;}
+  .hp-bar{height:100%;background:#5FC96B;width:100%;transition:width .5s ease;}
+
+  .battle-body{padding:16px 20px 8px;}
+  .q-box{
+    background:#fff;border-radius:14px;padding:14px 16px;font-weight:800;
+    color:#1F3B57;border:2px solid #E1EEF7;line-height:1.5;font-size:0.98em;
+    text-align:center;
+  }
+  .feedback{
+    text-align:center;font-weight:800;font-size:0.85em;min-height:18px;margin:8px 0 0;
+  }
+  .feedback.bad{color:#C94733;}
+  .feedback.good{color:#3E9142;}
+  .options{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px;
+  }
+  .opt-btn{
+    background:#fff;border:2px solid #CDE0EF;border-radius:12px;
+    padding:12px 8px;font-weight:800;color:#274A66;font-size:0.92em;
+    text-align:center;transition:transform .08s;
+  }
+  .opt-btn:active{transform:scale(0.96);}
+  .opt-btn.correct{background:#DFF4E1;border-color:#5FC96B;color:#245B29;}
+  .opt-btn.wrong{background:#FDE3DE;border-color:#EF8C79;color:#8C2E1C;}
+  .opt-btn:disabled{opacity:0.55;}
+  .battle-actions{display:flex;justify-content:center;gap:10px;padding:6px 20px 20px;}
+  .hint-box{
+    background:#FFF6DF;border:2px dashed #FFC94D;border-radius:12px;
+    padding:10px 12px;font-size:0.85em;font-weight:700;color:#5B3A00;margin:0 20px 14px;
+    display:none;
+  }
+  .hint-box.show{display:block;}
+
+  /* Reflection */
+  .reflect-title{font-family:'Baloo 2';font-weight:700;font-size:1.05em;text-align:center;margin:4px 0 2px;color:#274A66;}
+  .reflect-sub{text-align:center;font-size:0.82em;font-weight:700;color:#5B7F99;margin-bottom:12px;}
+  .choice-list{display:flex;flex-direction:column;gap:8px;padding:0 20px;}
+  .choice-btn{
+    text-align:left;background:#fff;border:2px solid #E1EEF7;border-radius:12px;
+    padding:10px 14px;font-weight:700;font-size:0.86em;color:#274A66;line-height:1.4;
+  }
+  .choice-btn.selected{background:#DDEEFB;border-color:#4E9FDA;color:#1F3B57;}
+  .conf-row{display:flex;gap:8px;padding:0 20px;margin-top:6px;}
+  .conf-btn{
+    flex:1;background:#fff;border:2px solid #E1EEF7;border-radius:12px;padding:10px 4px;
+    font-weight:800;font-size:0.8em;color:#274A66;
+  }
+  .conf-btn.selected{background:#FFF1CF;border-color:#FFC94D;color:#5B3A00;}
+  .catch-actions{padding:16px 20px 22px;text-align:center;}
+  #catchBtn:disabled{opacity:0.4;}
+  .sparkle-layer{position:absolute;inset:0;pointer-events:none;overflow:visible;}
+  .sparkle{position:absolute;font-size:1.4em;animation:sparkle 0.9s ease forwards;}
+  @keyframes sparkle{
+    0%{transform:translate(0,0) scale(0.3);opacity:0;}
+    30%{opacity:1;}
+    100%{transform:translate(var(--dx),var(--dy)) scale(1.1);opacity:0;}
+  }
+
+  /* ---------- Journal ---------- */
+  .journal-head{
+    background:linear-gradient(180deg,#B98CE0,#9463C9);
+    color:#fff;padding:16px 20px;border-radius:20px 20px 0 0;text-align:center;
+  }
+  .journal-head h3{margin:0;font-size:1.15em;}
+  .journal-head p{margin:4px 0 0;font-size:0.8em;font-weight:700;opacity:0.9;}
+  .journal-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:18px 20px;
+  }
+  .slot{
+    background:#fff;border-radius:14px;border:2px solid #ECE3F5;
+    padding:10px 6px 8px;text-align:center;cursor:pointer;
+  }
+  .slot.locked{opacity:0.55;cursor:default;}
+  .slot .pie{width:52px;height:52px;margin:0 auto 6px;animation:none;}
+  .slot .slot-name{font-size:0.72em;font-weight:800;color:#4A2E70;}
+  .slot.locked .slot-name{color:#999;}
+  .lockmark{font-size:1.6em;}
+
+  .detail-body{padding:6px 20px 10px;}
+  .detail-q{background:#fff;border:2px solid #ECE3F5;border-radius:12px;padding:12px 14px;font-weight:800;color:#3B2A55;font-size:0.9em;margin-bottom:10px;line-height:1.5;}
+  .detail-row{display:flex;gap:8px;margin-bottom:8px;font-size:0.85em;font-weight:700;}
+  .detail-row .tag{
+    flex:0 0 auto;padding:3px 9px;border-radius:99px;font-size:0.78em;font-weight:800;
+    color:#fff;height:fit-content;
+  }
+  .tag.you{background:#4E9FDA;}
+  .tag.correct{background:#5FC96B;}
+  .tag.strat{background:#B98CE0;}
+  .tag.conf{background:#FFC94D;color:#5B3A00;}
+  .explain-box{
+    background:#FDF6FF;border:2px dashed #D9BCF2;border-radius:12px;padding:12px 14px;
+    font-size:0.86em;font-weight:700;color:#4A2E70;line-height:1.55;margin-top:6px;
+  }
+  .explain-box b{color:#7A3FB0;}
+  .detail-foot{padding:6px 20px 22px;text-align:center;}
+
+  /* ---------- End screen ---------- */
+  .end-head{
+    background:linear-gradient(180deg,#FFD877,#FF9F5A);color:#5B2C00;
+    padding:26px 20px 18px;text-align:center;border-radius:20px 20px 0 0;
+  }
+  .end-head h2{margin:0 0 4px;font-size:1.4em;}
+  .end-body{padding:16px 20px 4px;}
+  .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.8em;font-weight:800;color:#3E5A34;}
+  .bar-label{width:150px;flex-shrink:0;}
+  .bar-track{flex:1;height:14px;background:#eee;border-radius:99px;overflow:hidden;}
+  .bar-fill{height:100%;background:#4E9FDA;border-radius:99px;}
+  .reflect-prompt{
+    background:#FFF6DF;border:2px dashed #FFC94D;border-radius:14px;padding:14px 16px;
+    margin:16px 20px 4px;font-weight:700;font-size:0.88em;color:#5B3A00;line-height:1.6;
+  }
+  .end-foot{display:flex;justify-content:center;gap:10px;padding:18px 20px 24px;flex-wrap:wrap;}
+
+  .frac{
+    display:inline-flex;flex-direction:column;align-items:center;
+    vertical-align:middle;line-height:1.05;font-weight:800;
+    margin:0 2px;transform:translateY(2px);
+  }
+  .frac .num{padding:0 3px 2px;border-bottom:2px solid currentColor;}
+  .frac .den{padding:2px 3px 0;}
+
+  .dash-table{width:100%;border-collapse:collapse;font-size:0.76em;}
+  .dash-table th,.dash-table td{border-bottom:1px solid #eee;padding:6px 5px;text-align:left;}
+  .dash-table th{font-family:'Baloo 2';color:#274A66;background:#F6FAFD;position:sticky;top:0;}
+  .dash-wrap{max-height:340px;overflow:auto;margin:0 20px 10px;border:1px solid #eee;border-radius:10px;}
+  .dash-empty{padding:24px;text-align:center;font-weight:700;color:#888;}
+  .dash-note{font-size:0.75em;color:#888;font-weight:700;padding:0 20px 14px;line-height:1.5;}
+  .dash-summary{padding:14px 20px 4px;font-size:0.82em;font-weight:800;color:#274A66;}
+
+  @media (max-width:420px){
+    .options{grid-template-columns:1fr;}
+    .journal-grid{grid-template-columns:repeat(3,1fr);gap:8px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============ TITLE SCREEN ============ -->
+  <div id="screen-title">
+    <span class="badge">Primary 3 · Fractions</span>
+    <h1>Fraction Trails</h1>
+    <p>Walk through the tall grass, meet wild <b>Fractlings</b>, battle them with fraction questions, and reflect on your thinking to catch them!</p>
+    <div class="title-critters" id="titleCritters"></div>
+    <input id="nameInput" type="text" placeholder="Enter your first name" maxlength="18">
+    <br>
+    <div id="focusPicker" style="margin:14px 0 4px;">
+      <div style="font-size:0.78em;font-weight:800;color:#F3FFE9;opacity:0.9;margin-bottom:8px;">
+        🎯 Pick a focus for today (optional)
+      </div>
+      <div id="focusPickerButtons" style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;"></div>
+    </div>
+    <button id="startBtn">Start Adventure →</button>
+    <div class="howto">
+      🎯 Pick a focus above and <b>only</b> those question types will appear (round may be a little shorter).<br>
+      🌿 <b>Tall grass</b> hides wild Fractlings — but not every patch has one, so explore!<br>
+      🧙 <b>Trail Guides</b> share a new tip every time you visit.<br>
+      🥋 <b>Rival Trainers</b> pop up in a different spot each time — beat their harder 3-question challenge for a badge.<br>
+      ⚔️ Answer to battle — get it right to weaken them.<br>
+      🌀 <b>Reflect</b> on how you solved it before you catch them.<br>
+      🎉 After Level 1, <b>you choose</b> your Bonus Round: new Fractlings, a rematch of your toughest ones, or both.<br>
+      📖 Open your <b>Journal</b> anytime to revise past questions.<br>
+      📤 Tap <b>My Results</b> anytime to export your progress for your teacher.
+    </div>
+    <button id="teacherLinkBtn" class="teacher-link">👩‍🏫 For teachers: how to collect results</button>
+  </div>
+
+  <!-- ============ MAIN GAME SCREEN ============ -->
+  <div id="screen-game" class="hidden">
+    <div id="topbar">
+      <div class="topbar-row">
+        <div class="tb-title" id="levelLabel">Level 1 · Explore</div>
+        <button id="journalBtn">📖 Journal</button>
+      </div>
+      <div class="topbar-row">
+        <div id="streakWrap" class="hidden">🔥 <span id="streakText">0</span></div>
+        <div id="progressWrap">
+          <span id="progressText">0/10</span>
+          <div id="progressBarOuter"><div id="progressBarInner"></div></div>
+        </div>
+        <button id="muteBtn" title="Toggle sound">🔊</button>
+        <button id="exportBtn" title="Export my results">📤</button>
+      </div>
+    </div>
+    <div id="mapWrap">
+      <div id="mapGrid"></div>
+      <div id="mapHint">Use the arrow keys / WASD or the buttons below to walk. Step into 🌿 to explore, or visit 🧙 / 🥋 to interact!</div>
+      <div id="dpad">
+        <button class="up" data-dx="0" data-dy="-1">▲</button>
+        <button class="left" data-dx="-1" data-dy="0">◀</button>
+        <div class="center"></div>
+        <button class="right" data-dx="1" data-dy="0">▶</button>
+        <button class="down" data-dx="0" data-dy="1">▼</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============ Modal templates (injected via JS) ============ -->
+<div id="modalRoot"></div>
+
+<script>
+(function(){
+
+/* ================= DATA ================= */
+
+// Every fractling has its own 4 reflection strategies, tailored to its question type.
+// Position in the array always means the same CATEGORY across all fractlings, so the
+// end-screen summary can group them meaningfully:
+//   [0] = applied a fraction rule/procedure   [1] = visualised / drew it
+//   [2] = used another working method          [3] = guessed
+const FRACTLINGS = [
+  {
+    id:0, name:"Halvo", tag:"Shading Type", num:1, den:2, color:"#4EC1A5", ear:"#2E9C81",
+    question:"This shape is split into equal parts and half of it is shaded. What fraction is shaded?",
+    options:["1/2","1/3","2/1","1/4"], correct:0,
+    hint:"Count how many equal parts make up the WHOLE shape, then count how many are shaded.",
+    explain:"The whole is cut into 2 equal parts (denominator = 2). 1 part is shaded (numerator = 1). So the fraction shaded is <b>1/2</b>.",
+    strategies:[
+      "I counted the total equal parts for the denominator, then the shaded parts for the numerator.",
+      "I pictured the shape split into equal pieces in my head.",
+      "I looked at the answer choices and eliminated the ones that didn't make sense.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:1, name:"Triqua", tag:"Shading Type", num:1, den:3, color:"#F2A65A", ear:"#D6863A",
+    question:"A pizza is cut into 3 equal slices. Mia eats 1 slice. What fraction of the pizza did she eat?",
+    options:["1/3","1/2","3/1","2/3"], correct:0,
+    hint:"The denominator is the total number of equal slices. The numerator is how many Mia ate.",
+    explain:"Total equal slices = denominator = 3. Slices Mia ate = numerator = 1. So she ate <b>1/3</b> of the pizza.",
+    strategies:[
+      "I used total slices as the denominator and slices eaten as the numerator.",
+      "I pictured the pizza cut into slices, like a real pizza.",
+      "I said the answer out loud in words first, then wrote it as a fraction.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:2, name:"Quadrin", tag:"Compare Type", num:4, den:5, color:"#8E7CE0", ear:"#6B54C4",
+    question:"Which fraction is greater: 3/5 or 4/5?",
+    options:["3/5","4/5","They are equal","Cannot tell"], correct:1,
+    hint:"When the denominators are the SAME, just compare the numerators (top numbers).",
+    explain:"Both fractions are out of 5 equal parts, so compare the numerators: 4 is greater than 3. That means <b>4/5 &gt; 3/5</b> — more equal parts are being taken.",
+    strategies:[
+      "I compared the numerators because the denominators were the same.",
+      "I pictured both fractions as bars or circles and compared the shaded parts.",
+      "I checked which fraction was closer to a whole.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:3, name:"Ordelle", tag:"Ordering Type", num:5, den:6, color:"#4E9FDA", ear:"#3576A8",
+    question:"Arrange these from SMALLEST to LARGEST: 2/6, 5/6, 1/6",
+    options:["1/6, 2/6, 5/6","5/6, 2/6, 1/6","2/6, 1/6, 5/6","5/6, 1/6, 2/6"], correct:0,
+    hint:"Same denominator (6) for all — just put the numerators in order: 1, 2, 5.",
+    explain:"All three fractions share the same denominator, 6, so we only need to order the numerators: 1 &lt; 2 &lt; 5. That gives us <b>1/6, 2/6, 5/6</b>.",
+    strategies:[
+      "I compared the numerators since all the denominators were the same.",
+      "I pictured each fraction and lined them up from smallest to largest.",
+      "I listed just the numerators first, ordered them, then rewrote the fractions.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:4, name:"Addix", tag:"Addition Type", num:5, den:7, color:"#FF9F5A", ear:"#DD7B33",
+    question:"2/7 + 3/7 = ?",
+    options:["5/7","5/14","1/7","6/7"], correct:0,
+    hint:"Same denominator? Add the numerators only, and keep the denominator the same.",
+    explain:"Since both fractions are out of 7, we add just the numerators: 2 + 3 = 5. The denominator stays the same. So 2/7 + 3/7 = <b>5/7</b>.",
+    strategies:[
+      "I added the numerators and kept the denominator the same.",
+      "I pictured combining the two groups of parts together.",
+      "I counted on using my fingers or a number line.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:5, name:"Subtra", tag:"Subtraction Type", num:4, den:9, color:"#E0637A", ear:"#B84156",
+    question:"6/9 − 2/9 = ?",
+    options:["4/9","4/0","8/9","3/9"], correct:0,
+    hint:"Same denominator — subtract the numerators only, and keep the denominator the same.",
+    explain:"Both fractions are out of 9, so subtract the numerators: 6 − 2 = 4. The denominator stays the same. So 6/9 − 2/9 = <b>4/9</b>.",
+    strategies:[
+      "I subtracted the numerators and kept the denominator the same.",
+      "I pictured taking parts away from the whole group.",
+      "I counted backwards from 6 to check the difference.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:6, name:"Wordlet", tag:"Word Problem", num:5, den:8, color:"#E07CC2", ear:"#B95498",
+    question:"Sam ate 2/8 of a cake. His sister ate 3/8 of the same cake. What fraction of the cake did they eat altogether?",
+    options:["5/8","5/16","1/8","6/8"], correct:0,
+    hint:"Both fractions are parts of the SAME cake (same denominator, 8) — add the numerators.",
+    explain:"They shared the same whole cake, cut into 8 equal parts. Add the numerators: 2 + 3 = 5. So together they ate <b>5/8</b> of the cake.",
+    strategies:[
+      "I noticed both fractions were parts of the same whole, then added the numerators.",
+      "I drew a picture of the cake being shared to help me.",
+      "I turned the words into a number sentence and solved it.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:7, name:"Setto", tag:"Fraction of a Set", num:1, den:4, color:"#E8C94E", ear:"#C7A82E",
+    question:"There are 12 sweets. 1/4 of them are red. How many sweets are red?",
+    options:["3","4","6","12"], correct:0,
+    hint:"Split the 12 sweets into 4 equal groups first, then take just 1 group.",
+    explain:"1/4 of 12 means dividing 12 into 4 equal groups: 12 ÷ 4 = 3 sweets per group. Taking 1 group gives <b>3</b> red sweets.",
+    strategies:[
+      "I divided the total into equal groups first, then took the number of groups I needed.",
+      "I drew or grouped the sweets into 4 piles to help me count.",
+      "I used a division fact I already knew (12 ÷ 4).",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:8, name:"Nearone", tag:"Near-A-Whole Type", num:4, den:5, color:"#63C97D", ear:"#3FA25B",
+    question:"Which fraction is closest to 1 whole? 2/5, 4/5, 1/5, 3/5",
+    options:["2/5","4/5","1/5","3/5"], correct:1,
+    hint:"Same denominator — the fraction with the BIGGEST numerator is closest to the whole (5/5 = 1).",
+    explain:"All are out of 5. The bigger the numerator, the closer the fraction is to 5/5 (a whole). 4 is the biggest numerator here, so <b>4/5</b> is closest to 1.",
+    strategies:[
+      "I compared the numerators — the biggest one is closest to a whole (5/5).",
+      "I pictured each fraction and saw which had the smallest empty part left.",
+      "I worked out how far each fraction was from a whole and compared.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:9, name:"Partly", tag:"Vocabulary Type", num:3, den:7, color:"#A9825A", ear:"#8A6742",
+    question:"In the fraction 3/7, what does the 7 represent?",
+    options:["Total equal parts the whole is divided into","Number of parts shaded","Number of parts NOT shaded","The value of the fraction"], correct:0,
+    hint:"The bottom number is called the denominator. Think about what 'equal parts' means.",
+    explain:"The bottom number (denominator) shows how many equal parts make up the WHOLE. The top number (numerator) shows how many of those parts we are looking at. So 7 is the <b>total equal parts</b>.",
+    strategies:[
+      "I recalled what the word 'denominator' means.",
+      "I pictured a real example, like pizza slices, to remind myself.",
+      "I eliminated the options that clearly didn't make sense.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:10, name:"Halfmark", tag:"Benchmark Type", num:3, den:8, color:"#5CBEDB", ear:"#3A96B3",
+    question:"Is 3/8 more than, less than, or exactly 1/2?",
+    options:["Less than 1/2","More than 1/2","Exactly 1/2","Cannot tell"], correct:0,
+    hint:"Half of 8 is 4. Is the numerator (3) more or less than 4?",
+    explain:"Half of the denominator 8 is 4, so 4/8 would equal 1/2. Since the numerator 3 is less than 4, <b>3/8 is less than 1/2</b>.",
+    strategies:[
+      "I found half of the denominator and compared it to the numerator.",
+      "I pictured the fraction on a bar and checked which side of the middle it landed on.",
+      "I converted both to the same denominator to compare.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:11, name:"Groupzy", tag:"Fraction of a Set", num:1, den:5, color:"#E8A13F", ear:"#C77F22",
+    question:"There are 20 stickers. 1/5 of them are gold. How many stickers are gold?",
+    options:["4","5","15","20"], correct:0,
+    hint:"Split the 20 stickers into 5 equal groups first, then take just 1 group.",
+    explain:"1/5 of 20 means dividing 20 into 5 equal groups: 20 ÷ 5 = 4 stickers per group. Taking 1 group gives <b>4</b> gold stickers.",
+    strategies:[
+      "I divided the total into equal groups first, then took the number of groups I needed.",
+      "I drew or grouped the stickers into 5 piles to help me count.",
+      "I used a division fact I already knew (20 ÷ 5).",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:12, name:"Subtrix", tag:"Subtraction Type", num:3, den:11, color:"#C25B7A", ear:"#9E3E5C",
+    question:"8/11 − 5/11 = ?",
+    options:["3/11","3/0","13/11","8/22"], correct:0,
+    hint:"Same denominator — subtract the numerators only, and keep the denominator the same.",
+    explain:"Both fractions are out of 11, so subtract the numerators: 8 − 5 = 3. The denominator stays the same. So 8/11 − 5/11 = <b>3/11</b>.",
+    strategies:[
+      "I subtracted the numerators and kept the denominator the same.",
+      "I pictured taking parts away from the whole group.",
+      "I counted backwards from 8 to check the difference.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:13, name:"Addelle", tag:"Word Problem", num:3, den:6, color:"#7FBF6B", ear:"#569943",
+    question:"Ben read 1/6 of a book on Monday and 2/6 more on Tuesday. What fraction of the book has he read in total?",
+    options:["3/6","3/12","1/6","2/6"], correct:0,
+    hint:"Both fractions are parts of the SAME book (same denominator, 6) — add the numerators.",
+    explain:"Both days are parts of the same whole book, cut into 6 equal parts. Add the numerators: 1 + 2 = 3. So altogether he's read <b>3/6</b> of the book.",
+    strategies:[
+      "I noticed both fractions were parts of the same whole, then added the numerators.",
+      "I drew a picture of the book being read bit by bit.",
+      "I turned the words into a number sentence and solved it.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:14, name:"Lineup", tag:"Ordering Type", num:7, den:8, color:"#9C7FE0", ear:"#7857BE",
+    question:"Arrange these from LARGEST to SMALLEST: 3/8, 7/8, 5/8",
+    options:["7/8, 5/8, 3/8","3/8, 5/8, 7/8","5/8, 7/8, 3/8","7/8, 3/8, 5/8"], correct:0,
+    hint:"Same denominator (8) for all — just put the numerators in order from biggest to smallest: 7, 5, 3.",
+    explain:"All three fractions share the same denominator, 8, so we only need to order the numerators from biggest to smallest: 7 &gt; 5 &gt; 3. That gives us <b>7/8, 5/8, 3/8</b>.",
+    strategies:[
+      "I compared the numerators since all the denominators were the same.",
+      "I pictured each fraction and lined them up from largest to smallest.",
+      "I listed just the numerators first, ordered them, then rewrote the fractions.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:15, name:"Wholesome", tag:"Vocabulary Type", num:4, den:4, color:"#4EA695", ear:"#33796C",
+    question:"Which of these fractions is equal to ONE WHOLE?",
+    options:["4/4","3/4","1/4","2/4"], correct:0,
+    hint:"A fraction equals one whole when the numerator and denominator are the SAME number.",
+    explain:"When the numerator equals the denominator, every equal part is included — that's the whole thing! So <b>4/4</b> equals 1 whole.",
+    strategies:[
+      "I checked which fraction had a numerator equal to its denominator.",
+      "I pictured each fraction as a shape and saw which one was fully shaded.",
+      "I eliminated the options that clearly didn't make sense.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:16, name:"Sumora", tag:"Addition Type", num:7, den:9, color:"#6FA8DC", ear:"#4C82B8",
+    question:"3/9 + 4/9 = ?",
+    options:["7/9","7/18","1/9","8/9"], correct:0,
+    hint:"Same denominator? Add the numerators only, and keep the denominator the same.",
+    explain:"Both fractions are out of 9, so add just the numerators: 3 + 4 = 7. The denominator stays the same. So 3/9 + 4/9 = <b>7/9</b>.",
+    strategies:[
+      "I added the numerators and kept the denominator the same.",
+      "I pictured combining the two groups of parts together.",
+      "I counted on using my fingers or a number line.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:17, name:"Plusix", tag:"Addition Type", num:3, den:5, color:"#E8955C", ear:"#C97538",
+    question:"1/5 + 2/5 = ?",
+    options:["3/5","3/10","1/5","4/5"], correct:0,
+    hint:"Same denominator — add the numerators, keep the denominator the same.",
+    explain:"Both fractions are out of 5, so add just the numerators: 1 + 2 = 3. So 1/5 + 2/5 = <b>3/5</b>.",
+    strategies:[
+      "I added the numerators and kept the denominator the same.",
+      "I pictured combining the two groups of parts together.",
+      "I counted on using my fingers or a number line.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:18, name:"Combino", tag:"Addition Type", num:7, den:10, color:"#7ED9A6", ear:"#4FAE7C",
+    question:"4/10 + 3/10 = ?",
+    options:["7/10","7/20","1/10","8/10"], correct:0,
+    hint:"Add the numerators only; the denominator (10) doesn't change.",
+    explain:"Both fractions are out of 10, so add just the numerators: 4 + 3 = 7. So 4/10 + 3/10 = <b>7/10</b>.",
+    strategies:[
+      "I added the numerators and kept the denominator the same.",
+      "I pictured combining the two groups of parts together.",
+      "I counted on using my fingers or a number line.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:19, name:"Minuso", tag:"Subtraction Type", num:5, den:10, color:"#D97BA6", ear:"#B2547F",
+    question:"9/10 − 4/10 = ?",
+    options:["5/10","5/0","13/10","4/10"], correct:0,
+    hint:"Same denominator — subtract the numerators only, keep the denominator the same.",
+    explain:"Both fractions are out of 10, so subtract just the numerators: 9 − 4 = 5. So 9/10 − 4/10 = <b>5/10</b>.",
+    strategies:[
+      "I subtracted the numerators and kept the denominator the same.",
+      "I pictured taking parts away from the whole group.",
+      "I counted backwards to check the difference.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:20, name:"Takeway", tag:"Subtraction Type", num:4, den:8, color:"#A87BD9", ear:"#8154B2",
+    question:"7/8 − 3/8 = ?",
+    options:["4/8","4/0","10/8","3/8"], correct:0,
+    hint:"Subtract the numerators only; the denominator (8) doesn't change.",
+    explain:"Both fractions are out of 8, so subtract just the numerators: 7 − 3 = 4. So 7/8 − 3/8 = <b>4/8</b>.",
+    strategies:[
+      "I subtracted the numerators and kept the denominator the same.",
+      "I pictured taking parts away from the whole group.",
+      "I counted backwards to check the difference.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:21, name:"Storyfrac", tag:"Word Problem", num:3, den:4, color:"#6BC7C1", ear:"#489B95",
+    question:"Mei drank 1/4 of a bottle in the morning and 2/4 more in the afternoon. What fraction has she drunk altogether?",
+    options:["3/4","3/8","1/4","2/4"], correct:0,
+    hint:"Both fractions are parts of the SAME bottle (same denominator) — add the numerators.",
+    explain:"Both amounts are parts of the same bottle, cut into 4 equal parts. Add the numerators: 1 + 2 = 3. So altogether she drank <b>3/4</b> of the bottle.",
+    strategies:[
+      "I noticed both fractions were parts of the same whole, then added the numerators.",
+      "I drew a picture to help me work it out.",
+      "I turned the words into a number sentence and solved it.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:22, name:"Talebit", tag:"Word Problem", num:3, den:10, color:"#E0B15C", ear:"#B98A36",
+    question:"A tank is 7/10 full. Dad adds water so it becomes completely full. What fraction of water did Dad add?",
+    options:["3/10","7/10","10/10","4/10"], correct:0,
+    hint:"The tank started at 7/10. Think about how much MORE is needed to reach 10/10.",
+    explain:"A full tank is 10/10. It started at 7/10, so Dad needed to add 10/10 − 7/10 = <b>3/10</b> to fill it.",
+    strategies:[
+      "I thought of the whole tank as 10/10 and subtracted what was already there.",
+      "I drew a picture to help me work it out.",
+      "I turned the words into a number sentence and solved it.",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:23, name:"Sharemint", tag:"Fraction of a Set", num:1, den:3, color:"#7C9BE0", ear:"#5A78BE",
+    question:"There are 18 marbles. 1/3 of them are blue. How many marbles are blue?",
+    options:["6","3","9","18"], correct:0,
+    hint:"Split the 18 marbles into 3 equal groups first, then take just 1 group.",
+    explain:"1/3 of 18 means dividing 18 into 3 equal groups: 18 ÷ 3 = 6 marbles per group. Taking 1 group gives <b>6</b> blue marbles.",
+    strategies:[
+      "I divided the total into equal groups first, then took the number of groups I needed.",
+      "I drew or grouped the marbles to help me count.",
+      "I used a division fact I already knew (18 ÷ 3).",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+  {
+    id:24, name:"Piecewise", tag:"Fraction of a Set", num:1, den:6, color:"#D9A05C", ear:"#B37D3A",
+    question:"A box has 24 pencils. 1/6 of them are red. How many pencils are red?",
+    options:["4","6","3","24"], correct:0,
+    hint:"Split the 24 pencils into 6 equal groups first, then take just 1 group.",
+    explain:"1/6 of 24 means dividing 24 into 6 equal groups: 24 ÷ 6 = 4 pencils per group. Taking 1 group gives <b>4</b> red pencils.",
+    strategies:[
+      "I divided the total into equal groups first, then took the number of groups I needed.",
+      "I drew or grouped the pencils to help me count.",
+      "I used a division fact I already knew (24 ÷ 6).",
+      "I wasn't fully sure, so I made my best guess."
+    ]
+  },
+];
+
+// A separate, tougher pool used only for Rival Trainer battles — these ask students to
+// combine two ideas (e.g. work out a fraction AND find what's left), so they feel like a
+// genuine step up from the wild Fractling questions rather than a repeat of them.
+const TRAINER_POOL = [
+  {
+    name:"Cake Split", tag:"Two-Step", num:4, den:9, color:"#E0637A", ear:"#B84156",
+    question:"Mrs Tan cut a cake into 9 equal pieces. She gave 2/9 to her neighbour and 3/9 to her sister. What fraction of the cake is LEFT?",
+    options:["4/9","5/9","9/9","1/9"], correct:0,
+    explain:"The whole cake is 9/9. She gave away 2/9 + 3/9 = 5/9. What's left is 9/9 − 5/9 = <b>4/9</b>."
+  },
+  {
+    name:"Equal Match", tag:"Equivalent Fractions", num:2, den:4, color:"#8E7CE0", ear:"#6B54C4",
+    question:"Which fraction is equivalent to 1/2?",
+    options:["2/4","2/3","3/5","1/3"], correct:0,
+    explain:"A fraction equals 1/2 when the numerator is exactly half the denominator. 2 is half of 4, so <b>2/4 = 1/2</b>."
+  },
+  {
+    name:"Ribbon Cut", tag:"Two-Step", num:2, den:3, color:"#F2A65A", ear:"#D6863A",
+    question:"A ribbon is 12m long. Raj cuts off 1/3 of it to make a bow. How many metres are LEFT?",
+    options:["8m","4m","3m","9m"], correct:0,
+    explain:"1/3 of 12m is 12 ÷ 3 = 4m cut off. What's left is 12m − 4m = <b>8m</b>."
+  },
+  {
+    name:"Whole Check", tag:"Vocabulary", num:3, den:4, color:"#4EA695", ear:"#33796C",
+    question:"Which of these fractions is NOT equal to one whole?",
+    options:["3/4","5/5","6/6","3/3"], correct:0,
+    explain:"A fraction equals a whole only when the numerator equals the denominator. In 3/4, 3 ≠ 4, so it is <b>not</b> a whole."
+  },
+  {
+    name:"Juice Box", tag:"Two-Step", num:3, den:6, color:"#5CBEDB", ear:"#3A96B3",
+    question:"Aisyah drank 2/6 of a bottle of juice in the morning and 1/6 more in the afternoon. What fraction of the juice has she NOT drunk?",
+    options:["3/6","4/6","2/6","1/6"], correct:0,
+    explain:"She drank 2/6 + 1/6 = 3/6 in total. The whole bottle is 6/6, so what's left is 6/6 − 3/6 = <b>3/6</b>."
+  },
+  {
+    name:"Order Check", tag:"Ordering", num:7, den:10, color:"#9C7FE0", ear:"#7857BE",
+    question:"Which list is correctly ordered from LARGEST to SMALLEST?",
+    options:["7/10, 4/10, 2/10","2/10, 4/10, 7/10","4/10, 7/10, 2/10","7/10, 2/10, 4/10"], correct:0,
+    explain:"Same denominator (10), so order the numerators from biggest to smallest: 7, 4, 2 — giving <b>7/10, 4/10, 2/10</b>."
+  },
+  {
+    name:"Sweet Count", tag:"Two-Step", num:2, den:5, color:"#E8A13F", ear:"#C77F22",
+    question:"A pack has 15 sweets. 2/5 of them are chocolate. How many sweets are NOT chocolate?",
+    options:["9","6","5","10"], correct:0,
+    explain:"2/5 of 15 is (15 ÷ 5) × 2 = 6 chocolate sweets. The rest are 15 − 6 = <b>9</b> sweets that are not chocolate."
+  },
+  {
+    name:"Closest Call", tag:"Near-A-Whole", num:5, den:6, color:"#63C97D", ear:"#3FA25B",
+    question:"Which fraction is closest to 1 whole: 5/6, 3/6, 1/6, or 4/6?",
+    options:["5/6","3/6","1/6","4/6"], correct:0,
+    explain:"All are out of 6. The bigger the numerator, the closer to a whole (6/6). 5 is the biggest here, so <b>5/6</b> is closest."
+  },
+  {
+    name:"Ribbon Leftover", tag:"Two-Step", num:3, den:8, color:"#E07CC2", ear:"#B95498",
+    question:"Farah's ribbon is cut into 8 equal parts. She uses 3/8 for a bow and 2/8 for a bookmark. What fraction of the ribbon is UNUSED?",
+    options:["3/8","5/8","1/8","6/8"], correct:0,
+    explain:"She used 3/8 + 2/8 = 5/8 in total. The whole ribbon is 8/8, so what's unused is 8/8 − 5/8 = <b>3/8</b>."
+  },
+  {
+    name:"Equal Pair", tag:"Equivalent Fractions", num:1, den:2, color:"#A9825A", ear:"#8A6742",
+    question:"Which pair of fractions are equal in value?",
+    options:["2/4 and 1/2","1/3 and 1/4","2/5 and 1/2","3/6 and 2/3"], correct:0,
+    explain:"2 is half of 4, so 2/4 = 1/2 — they name the same amount, just cut into a different number of equal parts."
+  },
+];
+
+// A THIRD pool, exclusive to the Level 3 Boss Battle. Every question here needs two or
+// three reasoning steps chained together, or larger/less-familiar denominators — a real
+// step up from both the wild Fractlings and the Rival Trainer questions — while staying
+// strictly within P3 skills (fraction of a set, ordering/comparing like fractions,
+// addition & subtraction of like fractions, and basic equivalent fractions). Nothing here
+// requires working backwards from a part to find an unknown whole, which is a P4/P5 skill.
+const BOSS_POOL = [
+  {
+    name:"Slice Trio", tag:"Three-Part Whole", num:3, den:12, color:"#C0392B", ear:"#922B21",
+    question:"A cake is cut into 12 equal slices. Dev eats 3/12, his brother eats 4/12, and his sister eats 2/12. What fraction of the cake is LEFT?",
+    options:["3/12","9/12","5/12","12/12"], correct:0,
+    explain:"Together they ate 3/12 + 4/12 + 2/12 = 9/12. The whole cake is 12/12, so what's left is 12/12 − 9/12 = <b>3/12</b>."
+  },
+  {
+    name:"Four in a Row", tag:"Ordering (4 fractions)", num:9, den:12, color:"#8E44AD", ear:"#6C3483",
+    question:"Arrange these from SMALLEST to LARGEST: 5/12, 2/12, 9/12, 7/12",
+    options:["2/12, 5/12, 7/12, 9/12","9/12, 7/12, 5/12, 2/12","5/12, 2/12, 9/12, 7/12","2/12, 9/12, 5/12, 7/12"], correct:0,
+    explain:"Same denominator (12), so just order the numerators: 2 &lt; 5 &lt; 7 &lt; 9 — giving <b>2/12, 5/12, 7/12, 9/12</b>."
+  },
+  {
+    name:"Shop Split", tag:"Fraction of a Set", num:3, den:5, color:"#D68910", ear:"#A66C0D",
+    question:"A shop has 30 sweets. 2/5 of them are lollipops. The rest are chocolates. How many are chocolates?",
+    options:["18","12","15","6"], correct:0,
+    explain:"2/5 of 30 is (30 ÷ 5) × 2 = 12 lollipops. The rest are chocolates: 30 − 12 = <b>18</b>."
+  },
+  {
+    name:"Gap Finder", tag:"Equivalent Fractions", num:6, den:8, color:"#2E86C1", ear:"#1B4F72",
+    question:"3/4 is equivalent to ?/8. What is the missing numerator?",
+    options:["6","3","4","8"], correct:0,
+    explain:"To turn quarters into eighths, the denominator doubles (4 → 8), so the numerator doubles too: 3 × 2 = <b>6</b>. So 3/4 = 6/8."
+  },
+  {
+    name:"Ribbon Relay", tag:"Two-Step", num:5, den:12, color:"#16A085", ear:"#0E6655",
+    question:"A ribbon is 24m long. Mrs Lee cuts 1/3 of it for a bow, then cuts 1/4 of the ORIGINAL ribbon for a badge. How many metres of ribbon are left?",
+    options:["10m","14m","8m","6m"], correct:0,
+    explain:"1/3 of 24m = 8m for the bow. 1/4 of 24m = 6m for the badge. Together that's 8m + 6m = 14m used, so what's left is 24m − 14m = <b>10m</b>."
+  },
+  {
+    name:"Furthest Out", tag:"Near-A-Whole", num:2, den:9, color:"#E74C3C", ear:"#B03A2E",
+    question:"Which fraction is FURTHEST from 1 whole: 7/9, 8/9, 2/9, or 5/9?",
+    options:["2/9","8/9","5/9","7/9"], correct:0,
+    explain:"All are out of 9. The smaller the numerator, the further from a whole (9/9). 2 is the smallest numerator here, so <b>2/9</b> is furthest away."
+  },
+  {
+    name:"Two Tanks", tag:"Comparing", num:2, den:8, color:"#2980B9", ear:"#1F618D",
+    question:"Tank A is 5/8 full. Tank B is 3/8 full. How much MORE full is Tank A than Tank B?",
+    options:["2/8","8/8","3/8","5/8"], correct:0,
+    explain:"Both tanks are measured out of the same 8 equal parts, so subtract the numerators: 5 − 3 = 2. Tank A is <b>2/8</b> more full than Tank B."
+  },
+  {
+    name:"Trip Sharing", tag:"Fraction of a Set", num:1, den:4, color:"#F39C12", ear:"#B9770E",
+    question:"36 students went on a trip. 1/4 of them brought umbrellas and 1/6 of them brought raincoats. How many MORE students brought umbrellas than raincoats?",
+    options:["3","9","6","15"], correct:0,
+    explain:"1/4 of 36 = 9 umbrellas. 1/6 of 36 = 6 raincoats. The difference is 9 − 6 = <b>3</b> more students with umbrellas."
+  },
+  {
+    name:"Full Circle", tag:"Working Backwards", num:4, den:6, color:"#7D3C98", ear:"#5B2C6F",
+    question:"A pizza is cut into 6 equal slices. Ali eats some slices, leaving 2/6 of the pizza. What fraction of the pizza did Ali eat?",
+    options:["4/6","2/6","6/6","3/6"], correct:0,
+    explain:"The whole pizza is 6/6. If 2/6 is left, Ali ate 6/6 − 2/6 = <b>4/6</b> of the pizza."
+  },
+  {
+    name:"Mixed Bag", tag:"Three-Part Set", num:11, den:20, color:"#27AE60", ear:"#1E8449",
+    question:"A bag has 40 marbles: 1/5 are red, 1/4 are blue, and the rest are green. How many marbles are green?",
+    options:["22","18","10","30"], correct:0,
+    explain:"1/5 of 40 = 8 red. 1/4 of 40 = 10 blue. Together that's 8 + 10 = 18 marbles, so the rest are green: 40 − 18 = <b>22</b>."
+  },
+];
+
+
+const CONFIDENCE = ["Not sure","Sort of sure","Very sure"];
+
+const GUIDES = {
+  N1:{ name:"Scholar Mei", avatar:"🧙‍♀️", tips:[
+      "Remember: the <b>denominator</b> (bottom number) tells you how many EQUAL parts the whole is split into. The <b>numerator</b> (top number) tells you how many of those parts you have!",
+      "A fraction is just a fair way to share — like splitting a chocolate bar equally among friends!",
+      "Always check: are the parts really EQUAL? A fraction only works if every part is the same size.",
+      "Try picturing a fraction as a pizza: the denominator is the number of slices, the numerator is how many you're looking at."
+  ]},
+  N2:{ name:"Scholar Zed", avatar:"🧙", tips:[
+      "When two fractions have the <b>SAME denominator</b>, you can compare, add or subtract them just by working with the numerators — the denominator stays the same!",
+      "To find a fraction of a number: divide first, then take that many groups. For 1/4 of 12, do 12 ÷ 4 = 3.",
+      "The bigger the numerator (with the same denominator), the closer that fraction is to a whole!",
+      "Adding or subtracting fractions? Only work with the top numbers if the bottom numbers already match — never touch the denominator!"
+  ]},
+};
+const lastTipIndex = {};
+
+const TRAINERS = {
+  R1:{ name:"Trainer Kofi", avatar:"🥋",
+       intro:"Ready for a Fraction Showdown? I'll fire 3 questions your way — get at least 2 right to earn my badge!" },
+  R2:{ name:"Trainer Ines", avatar:"🥋",
+       intro:"Think you know your fractions? Beat my 3-question challenge to earn my badge!" },
+};
+
+// 12 x 8 map. '#'=tree  '.'=path  'S#'=grass slot (may hold a Fractling, or be empty)  'N#'=trail guide
+// Rival Trainers are NOT baked into this grid — they're placed at runtime on 2 of the
+// TRAINER_CANDIDATES cells below, shuffled fresh every playthrough (see assignTrainerPositions).
+const MAP = [
+  ["#","#","#","#","#","#","#","#","#","#","#","#"],
+  ["#",".","S0","S1",".",".","S2",".","S3","S4",".","#"],
+  ["#",".","#",".","#",".","#",".","#",".",".","#"],
+  ["#",".","S5",".",".","N1",".",".",".",".",".","#"],
+  ["#","S6",".","S7",".","S8","S9",".","S10",".",".","#"],
+  ["#",".","#",".","#",".","#",".","#",".",".","#"],
+  ["#",".",".","S11",".","N2",".",".",".",".",".","#"],
+  ["#","#","#","#","#","#","#","#","#","#","#","#"],
+];
+// Grouped into 3 kid-friendly categories so the title-screen focus picker isn't overwhelming
+const CATEGORY_GROUPS = [
+  {key:'understand', label:'🔍 Naming & Comparing', tags:['Shading Type','Compare Type','Ordering Type','Benchmark Type','Near-A-Whole Type','Vocabulary Type']},
+  {key:'addsub', label:'➕➖ Adding & Subtracting', tags:['Addition Type','Subtraction Type']},
+  {key:'wordprob', label:'📖 Word Problems & Sets', tags:['Word Problem','Fraction of a Set']},
+];
+
+const TRAINER_CANDIDATES = [
+  {row:1,col:10}, {row:3,col:4}, {row:4,col:10}, {row:6,col:10}, {row:2,col:1}, {row:6,col:1}
+];
+const TOTAL_SLOTS = 12; // 10 hold a Fractling each round, only 2 are empty — keeps the last few findable
+const ROWS = MAP.length, COLS = MAP[0].length;
+const START = {row:3, col:1};
+
+/* ================= STATE ================= */
+const state = {
+  pos:{...START},
+  caught:{},           // fractlingId -> true
+  records:{},          // fractlingId -> {yourAnswer, correctAnswer, strategy, confidence, attempts, neededHint}
+  battle:null,         // {id, wrongCount}
+  slotAssignment:{},   // slotIndex -> fractlingId or null (decoy)
+  sessionFractlingIds:[], // this LEVEL's 10 target Fractlings
+  level1TargetIds:[],  // remembered so Level 2 can mix in unused ones + rematches
+  levelResolved:{},    // fractlingId -> true, reset every level (drives progress bar + tile look)
+  level:1,             // 1 = Explore, 2 = Bonus Round, 3 = Boss Battle
+  focusTags:[],        // optional: tags the player chose to focus on for Level 1
+  bossBattle:null,      // {qIndex, correctCount, questions, missed}
+  bossPassed:false,
+  exitNote:"",
+  trainerBadges:{},    // trainerKey -> true
+  trainerBattle:null,  // {key, qIndex, correctCount, questions}
+  trainerPositions:{}, // "row,col" -> trainerKey, reshuffled every playthrough
+  trainerPosByKey:{},  // trainerKey -> {row,col}
+  streak:0,
+  bestStreak:0,
+  muted:false,
+  playerName:"",
+  storageKey:"",
+};
+
+/* ================= HELPERS ================= */
+function pieBackground(numerator, denominator, color){
+  const sweep = 360 * numerator / denominator;
+  const spokeStep = 360 / denominator;
+  const spokes = `repeating-conic-gradient(from 0deg, rgba(0,0,0,0.12) 0deg ${Math.max(spokeStep-2,0.5)}deg, transparent ${Math.max(spokeStep-2,0.5)}deg ${spokeStep}deg)`;
+  const fill = `conic-gradient(${color} 0deg ${sweep}deg, #ffffff ${sweep}deg 360deg)`;
+  return `${spokes}, ${fill}`;
+}
+function makePieEl(f, size){
+  const el = document.createElement('div');
+  el.className = 'pie';
+  el.style.width = size+'px';
+  el.style.height = size+'px';
+  el.style.backgroundImage = pieBackground(f.num, f.den, f.color);
+  el.style.setProperty('--ear-color', f.ear);
+  el.innerHTML = `
+    <div class="ear l"></div><div class="ear r"></div>
+    <div class="eye l"></div><div class="eye r"></div>
+    <div class="mouth"></div>`;
+  return el;
+}
+function shuffleStable(arr){ return arr; } // options kept in fixed order (simpler for young learners)
+
+// Converts any "3/5" style text into a properly stacked numerator/denominator span,
+// leaving all surrounding words, numbers and punctuation untouched.
+function formatFractionText(str){
+  return String(str).replace(/(\d+)\/(\d+)/g, (m, n, d) =>
+    `<span class="frac"><span class="num">${n}</span><span class="den">${d}</span></span>`
+  );
+}
+
+function shuffleArray(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function assignSlots(mode){
+  let targetIds;
+  if(state.level <= 1){
+    const allIds = FRACTLINGS.map(f=>f.id);
+    if(state.focusTags.length===0){
+      targetIds = shuffleArray([...allIds]).slice(0,10);
+    } else {
+      // Strict filter: a chosen focus should ONLY show that category's questions,
+      // never padded out with unrelated ones — a shorter, genuinely-focused round
+      // is better than a diluted one.
+      const matched = shuffleArray(allIds.filter(id => state.focusTags.includes(FRACTLINGS.find(f=>f.id===id).tag)));
+      targetIds = matched.slice(0,10);
+    }
+    state.level1TargetIds = targetIds;
+  } else {
+    const unused = FRACTLINGS.map(f=>f.id).filter(id => !state.level1TargetIds.includes(id));
+    const struggleScore = id=>{
+      const r = state.records[id] || {};
+      return (r.attempts||1) + (r.neededHint?1:0);
+    };
+    const reviewSorted = [...state.level1TargetIds].sort((a,b)=> struggleScore(b)-struggleScore(a));
+    if(mode==='new'){
+      targetIds = shuffleArray([...unused]).slice(0,10);
+    } else if(mode==='review'){
+      targetIds = shuffleArray(reviewSorted.slice(0,6));
+    } else {
+      const reviewPicks = reviewSorted.slice(0, Math.max(0, 10-unused.length));
+      targetIds = shuffleArray([...unused, ...reviewPicks]).slice(0,10);
+    }
+  }
+  state.sessionFractlingIds = targetIds;
+  state.levelResolved = {};
+
+  const allSlots = shuffleArray(Array.from({length:TOTAL_SLOTS}, (_,i)=>i));
+  const filled = allSlots.slice(0, targetIds.length);
+  const order = shuffleArray([...targetIds]);
+  state.slotAssignment = {};
+  allSlots.forEach(s => state.slotAssignment[s] = null);
+  filled.forEach((slotIdx, i) => { state.slotAssignment[slotIdx] = order[i]; });
+}
+function slotForFractling(fid){
+  return Object.keys(state.slotAssignment).find(k => String(state.slotAssignment[k]) === String(fid));
+}
+
+function assignTrainerPositions(){
+  const shuffled = shuffleArray([...TRAINER_CANDIDATES]);
+  const keys = Object.keys(TRAINERS);
+  state.trainerPositions = {};
+  state.trainerPosByKey = {};
+  keys.forEach((k, i)=>{
+    const pos = shuffled[i];
+    state.trainerPositions[pos.row+','+pos.col] = k;
+    state.trainerPosByKey[k] = pos;
+  });
+}
+
+/* ---- Sound effects (Web Audio, no external files) ---- */
+let audioCtx = null;
+function ensureAudio(){
+  if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ audioCtx=null; } }
+  return audioCtx;
+}
+function playTone(freq, dur, type, vol, delay){
+  if(state.muted) return;
+  const ctx = ensureAudio(); if(!ctx) return;
+  setTimeout(()=>{
+    try{
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = type||'sine'; o.frequency.value = freq; g.gain.value = vol!=null?vol:0.15;
+      o.connect(g); g.connect(ctx.destination);
+      const t = ctx.currentTime;
+      o.start(t);
+      g.gain.exponentialRampToValueAtTime(0.001, t+dur);
+      o.stop(t+dur+0.02);
+    }catch(e){}
+  }, delay||0);
+}
+function sfxCorrect(){ playTone(880,0.12,'sine',0.16,0); playTone(1175,0.14,'sine',0.16,90); }
+function sfxWrong(){ playTone(160,0.22,'sawtooth',0.12,0); }
+function sfxCatch(){ [660,880,1100,1320].forEach((f,i)=>playTone(f,0.16,'sine',0.15,i*110)); }
+function sfxBadge(){ [520,660,780,1040,1320].forEach((f,i)=>playTone(f,0.18,'triangle',0.16,i*100)); }
+function sfxDecoy(){ playTone(300,0.1,'sine',0.08,0); }
+
+const DECOY_MESSAGES = [
+  "🍃 Just rustling leaves... no Fractling here.",
+  "🌾 Empty patch — keep exploring!",
+  "🦗 Only a cricket chirping in there.",
+  "🍂 Nothing this time. Try another patch!"
+];
+function showDecoyRustle(slotIdx){
+  sfxDecoy();
+  toast(DECOY_MESSAGES[Math.floor(Math.random()*DECOY_MESSAGES.length)]);
+  if(slotIdx!==undefined && slotTileEls[slotIdx]){
+    slotTileEls[slotIdx].classList.add('checked-empty');
+  }
+}
+
+/* ================= TITLE SCREEN CRITTERS ================= */
+function renderTitleCritters(){
+  const wrap = document.getElementById('titleCritters');
+  [0,4,8].forEach(i=>{
+    const f = FRACTLINGS[i];
+    const pie = makePieEl(f, 48);
+    pie.classList.add('mini-pie');
+    pie.style.animation = 'none';
+    wrap.appendChild(pie);
+  });
+}
+renderTitleCritters();
+
+function renderFocusPicker(){
+  const wrap = document.getElementById('focusPickerButtons');
+  CATEGORY_GROUPS.forEach(group=>{
+    const b = document.createElement('button');
+    b.className = 'focus-pill';
+    b.textContent = group.label;
+    b.dataset.key = group.key;
+    b.addEventListener('click', ()=>{
+      b.classList.toggle('selected');
+      const active = wrap.querySelectorAll('.focus-pill.selected');
+      state.focusTags = Array.from(active).flatMap(el=>{
+        const g = CATEGORY_GROUPS.find(x=>x.key===el.dataset.key);
+        return g ? g.tags : [];
+      });
+    });
+    wrap.appendChild(b);
+  });
+}
+renderFocusPicker();
+
+/* ================= MAP RENDER ================= */
+const mapGrid = document.getElementById('mapGrid');
+let tileEls = [];
+let slotTileEls = {};
+let trainerTileEls = {};
+
+function buildGrassBlades(tile){
+  const cluster = document.createElement('div');
+  cluster.className = 'blade-cluster';
+  const count = 6;
+  for(let i=0;i<count;i++){
+    const blade = document.createElement('div');
+    blade.className = 'blade ' + (i%2===0 ? 'b-l' : 'b-d');
+    const heightPct = 55 + Math.random()*35;
+    const rot = Math.round(Math.random()*18-9);
+    const leftPct = 6 + i*(88/(count-1)) + (Math.random()*6-3);
+    blade.style.height = heightPct+'%';
+    blade.style.left = leftPct+'%';
+    blade.style.setProperty('--r', rot+'deg');
+    blade.style.setProperty('--ad', (Math.random()*1.6).toFixed(2)+'s');
+    cluster.appendChild(blade);
+  }
+  tile.appendChild(cluster);
+  const star = document.createElement('div');
+  star.className = 'grass-star';
+  star.textContent = '⭐';
+  tile.appendChild(star);
+}
+
+function initMap(){
+  mapGrid.innerHTML = '';
+  tileEls = [];
+  slotTileEls = {};
+  trainerTileEls = {};
+  for(let r=0;r<ROWS;r++){
+    const rowArr = [];
+    for(let c=0;c<COLS;c++){
+      const val = MAP[r][c];
+      const t = document.createElement('div');
+      t.className = 'tile';
+      if(val==='#'){ t.classList.add('t-tree'); }
+      else if(val==='.'){ t.classList.add('t-path'); }
+      else if(val && val[0]==='S'){
+        t.classList.add('t-grass');
+        const slotIdx = +val.slice(1);
+        t.dataset.slot = slotIdx;
+        buildGrassBlades(t);
+        slotTileEls[slotIdx] = t;
+      }
+      else if(val && val[0]==='N'){ t.classList.add('t-guide'); t.dataset.guide = val; }
+      mapGrid.appendChild(t);
+      rowArr.push(t);
+    }
+    tileEls.push(rowArr);
+  }
+  Object.entries(state.trainerPosByKey).forEach(([key, pos])=>{
+    const tile = tileEls[pos.row][pos.col];
+    tile.classList.remove('t-path');
+    tile.classList.add('t-trainer');
+    tile.dataset.trainer = key;
+    if(state.trainerBadges[key]) tile.classList.add('beaten');
+    trainerTileEls[key] = tile;
+  });
+  const player = document.createElement('div');
+  player.id = 'player';
+  player.innerHTML = '<span class="sprite">🧑‍🌾</span>';
+  mapGrid.appendChild(player);
+  positionPlayer();
+  refreshCaughtTiles();
+  updateProximityGlow();
+}
+
+function positionPlayer(){
+  const player = document.getElementById('player');
+  const pct = 100/COLS;
+  const pctR = 100/ROWS;
+  player.style.left = (state.pos.col*pct)+'%';
+  player.style.top = (state.pos.row*pctR)+'%';
+  player.style.width = pct+'%';
+  player.style.height = pctR+'%';
+}
+
+function refreshCaughtTiles(){
+  Object.keys(state.levelResolved).forEach(fid=>{
+    const slotIdx = slotForFractling(fid);
+    if(slotIdx!==undefined && slotTileEls[slotIdx]) slotTileEls[slotIdx].classList.add('caught');
+  });
+  revealLastFractling();
+}
+
+function revealLastFractling(){
+  // Safety net: once only one Fractling is left this level, give it a gentle glow so
+  // students aren't stuck re-checking already-empty patches for ages at the tail end.
+  document.querySelectorAll('.hint-glow').forEach(el=>el.classList.remove('hint-glow'));
+  const remaining = state.sessionFractlingIds.filter(id => !state.levelResolved[id]);
+  if(remaining.length === 1){
+    const slotIdx = slotForFractling(remaining[0]);
+    if(slotIdx!==undefined && slotTileEls[slotIdx] && !slotTileEls[slotIdx].classList.contains('caught')){
+      slotTileEls[slotIdx].classList.add('hint-glow');
+    }
+  }
+}
+
+function tryMove(dx,dy){
+  if(state.battle || state.trainerBattle) return; // no moving mid-battle
+  const nr = state.pos.row+dy, nc = state.pos.col+dx;
+  if(nr<0||nr>=ROWS||nc<0||nc>=COLS) return;
+  const val = MAP[nr][nc];
+  if(val==='#') return;
+  state.pos = {row:nr, col:nc};
+  positionPlayer();
+  updateProximityGlow();
+  const trainerKey = state.trainerPositions[nr+','+nc];
+  if(trainerKey){
+    startTrainerBattle(trainerKey);
+    return;
+  }
+  if(val && val[0]==='S'){
+    const slotIdx = +val.slice(1);
+    const fid = state.slotAssignment[slotIdx];
+    if(fid===null || fid===undefined){
+      showDecoyRustle(slotIdx);
+    } else if(!state.levelResolved[fid]){
+      startEncounter(fid);
+    }
+  } else if(val && val[0]==='N'){
+    openGuideDialog(val);
+  }
+}
+
+// Gentle "warmer/colder" cue: any uncaught Fractling patch directly next to the player
+// gets a soft golden glow, so hunting for the last one or two doesn't drag on forever.
+function updateProximityGlow(){
+  document.querySelectorAll('.t-grass.near').forEach(el=> el.classList.remove('near'));
+  const {row,col} = state.pos;
+  [[row-1,col],[row+1,col],[row,col-1],[row,col+1]].forEach(([r,c])=>{
+    if(r<0||r>=ROWS||c<0||c>=COLS) return;
+    const val = MAP[r][c];
+    if(!(val && val[0]==='S')) return;
+    const slotIdx = +val.slice(1);
+    const fid = state.slotAssignment[slotIdx];
+    if(fid!==null && fid!==undefined && !state.levelResolved[fid] && slotTileEls[slotIdx]){
+      slotTileEls[slotIdx].classList.add('near');
+    }
+  });
+}
+
+document.addEventListener('keydown', (e)=>{
+  const k = e.key.toLowerCase();
+  const map = {arrowup:[0,-1], w:[0,-1], arrowdown:[0,1], s:[0,1], arrowleft:[-1,0], a:[-1,0], arrowright:[1,0], d:[1,0]};
+  if(map[k]){
+    e.preventDefault();
+    tryMove(map[k][0], map[k][1]);
+  }
+});
+document.getElementById('dpad').querySelectorAll('button').forEach(b=>{
+  b.addEventListener('click', ()=> tryMove(+b.dataset.dx, +b.dataset.dy));
+});
+
+/* Swipe gestures on the map, so touch users aren't limited to the D-pad */
+(function setupSwipe(){
+  const grid = document.getElementById('mapGrid');
+  let startX=0, startY=0, tracking=false;
+  const THRESHOLD = 24;
+  grid.addEventListener('touchstart', (e)=>{
+    if(e.touches.length!==1) return;
+    tracking = true;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, {passive:true});
+  grid.addEventListener('touchend', (e)=>{
+    if(!tracking) return;
+    tracking = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX, dy = t.clientY - startY;
+    if(Math.max(Math.abs(dx), Math.abs(dy)) < THRESHOLD) return;
+    if(Math.abs(dx) > Math.abs(dy)){
+      tryMove(dx > 0 ? 1 : -1, 0);
+    } else {
+      tryMove(0, dy > 0 ? 1 : -1);
+    }
+  }, {passive:true});
+})();
+
+/* ================= MODAL SYSTEM ================= */
+const modalRoot = document.getElementById('modalRoot');
+function openModal(html){
+  modalRoot.innerHTML = `<div class="modal-overlay" id="curOverlay"><div class="modal-card">${html}</div></div>`;
+  return document.getElementById('curOverlay');
+}
+function closeModal(){ modalRoot.innerHTML=''; }
+
+/* ================= GUIDE DIALOG ================= */
+function openGuideDialog(key){
+  const g = GUIDES[key];
+  let idx = Math.floor(Math.random()*g.tips.length);
+  if(g.tips.length>1 && idx===lastTipIndex[key]){
+    idx = (idx+1) % g.tips.length;
+  }
+  lastTipIndex[key] = idx;
+  const overlay = openModal(`
+    <button class="modal-close" data-close>×</button>
+    <div class="dialog-head"><span class="avatar">${g.avatar}</span><span class="name">${g.name}</span></div>
+    <div class="dialog-body"><div class="bubble">${formatFractionText(g.tips[idx])}</div></div>
+    <div class="dialog-foot"><button class="btn-primary" data-close>Thanks!</button></div>
+  `);
+  overlay.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click', closeModal));
+}
+
+/* ================= BATTLE ================= */
+function startEncounter(id){
+  const f = FRACTLINGS[id];
+  state.battle = {id, wrongCount:0};
+  renderBattleFight(f);
+}
+
+function renderBattleFight(f){
+  const overlay = openModal(`
+    <button class="modal-close" data-close>×</button>
+    <div class="battle-head">
+      <h3>A wild Fractling appeared!</h3>
+      <div class="sub">Answer correctly to weaken it</div>
+    </div>
+    <div class="creature-stage" id="creatureStage">
+      <div class="creature-name">${f.name}</div>
+      <div class="creature-tag">${f.tag}</div>
+      <div class="hp-wrap"><div class="hp-bar" id="hpBar"></div></div>
+    </div>
+    <div class="battle-body">
+      <div class="q-box">${formatFractionText(f.question)}</div>
+      <div class="feedback" id="feedback"></div>
+      <div class="options" id="optionsWrap"></div>
+    </div>
+    <div class="hint-box" id="hintBox">${formatFractionText(f.hint)}</div>
+    <div class="battle-actions">
+      <button class="btn-secondary" id="hintBtn">💡 Ask for a hint</button>
+    </div>
+  `);
+  const stage = document.getElementById('creatureStage');
+  const pie = makePieEl(f, 110);
+  pie.id = 'battlePie';
+  stage.insertBefore(pie, stage.firstChild);
+
+  const optsWrap = document.getElementById('optionsWrap');
+  f.options.forEach((opt, idx)=>{
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    b.innerHTML = formatFractionText(opt);
+    b.addEventListener('click', ()=> handleAnswer(idx, f));
+    optsWrap.appendChild(b);
+  });
+
+  document.getElementById('hintBtn').addEventListener('click', ()=>{
+    document.getElementById('hintBox').classList.add('show');
+  });
+  overlay.querySelector('[data-close]').addEventListener('click', ()=>{ state.battle=null; closeModal(); });
+}
+
+function handleAnswer(idx, f){
+  const opts = document.querySelectorAll('.opt-btn');
+  opts.forEach(b=>b.disabled = true);
+  const feedback = document.getElementById('feedback');
+  const pie = document.getElementById('battlePie');
+  const hpBar = document.getElementById('hpBar');
+
+  if(idx === f.correct){
+    opts[idx].classList.add('correct');
+    feedback.textContent = "Critical hit! That's correct!";
+    feedback.className = 'feedback good';
+    pie.classList.add('hit');
+    hpBar.style.width = '0%';
+    sfxCorrect();
+    const usedHint = document.getElementById('hintBox').classList.contains('show');
+    state.records[f.id] = state.records[f.id] || {};
+    state.records[f.id].yourAnswer = f.options[idx];
+    state.records[f.id].correctAnswer = f.options[f.correct];
+    state.records[f.id].question = f.question;
+    state.records[f.id].attempts = (state.battle.wrongCount||0) + 1;
+    state.records[f.id].neededHint = usedHint;
+    if(state.battle.wrongCount===0){
+      state.streak++;
+      state.bestStreak = Math.max(state.bestStreak, state.streak);
+    } else {
+      state.streak = 0;
+    }
+    updateStreakUI();
+    setTimeout(()=>{ renderReflect(f); }, 900);
+  } else {
+    opts[idx].classList.add('wrong');
+    feedback.textContent = "Not quite — give it another go!";
+    feedback.className = 'feedback bad';
+    pie.classList.remove('hit'); void pie.offsetWidth; pie.classList.add('hit');
+    sfxWrong();
+    state.battle.wrongCount++;
+    state.streak = 0;
+    updateStreakUI();
+    if(state.battle.wrongCount>=1){
+      document.getElementById('hintBox').classList.add('show');
+    }
+    setTimeout(()=>{ opts.forEach((b,i)=>{ if(i!==idx){ b.disabled=false; } b.classList.remove('wrong'); }); }, 700);
+  }
+}
+
+function updateStreakUI(){
+  const wrap = document.getElementById('streakWrap');
+  const text = document.getElementById('streakText');
+  if(!wrap || !text) return;
+  text.textContent = state.streak;
+  wrap.classList.toggle('hidden', state.streak < 2);
+}
+
+function renderReflect(f){
+  const overlay = openModal(`
+    <button class="modal-close" data-close>×</button>
+    <div class="battle-head" style="background:linear-gradient(180deg,#B98CE0,#9463C9);">
+      <h3>Nice work!</h3>
+      <div class="sub">Reflect before you catch ${f.name}</div>
+    </div>
+    <div class="creature-stage" id="reflectStage" style="margin-top:-32px;"></div>
+    <div class="reflect-title">How did you figure out your answer?</div>
+    <div class="reflect-sub">Pick the one closest to how you actually thought</div>
+    <div class="choice-list" id="stratList"></div>
+    <div class="reflect-title" style="margin-top:16px;">How confident do you feel?</div>
+    <div class="conf-row" id="confRow"></div>
+    <div class="catch-actions">
+      <button class="btn-primary" id="catchBtn" disabled>🌀 Focus &amp; Catch!</button>
+    </div>
+  `);
+  const stage = document.getElementById('reflectStage');
+  const pie = makePieEl(f, 90);
+  pie.style.animation = 'idle 2.6s ease-in-out infinite';
+  stage.appendChild(pie);
+
+  let stratIdx = null, confIdx = null;
+  const stratList = document.getElementById('stratList');
+  f.strategies.forEach((s, i)=>{
+    const b = document.createElement('button');
+    b.className='choice-btn';
+    b.innerHTML = formatFractionText(s);
+    b.addEventListener('click', ()=>{
+      stratList.querySelectorAll('.choice-btn').forEach(x=>x.classList.remove('selected'));
+      b.classList.add('selected');
+      stratIdx = i;
+      checkReady();
+    });
+    stratList.appendChild(b);
+  });
+  const confRow = document.getElementById('confRow');
+  CONFIDENCE.forEach((c,i)=>{
+    const b = document.createElement('button');
+    b.className='conf-btn';
+    b.textContent = c;
+    b.addEventListener('click', ()=>{
+      confRow.querySelectorAll('.conf-btn').forEach(x=>x.classList.remove('selected'));
+      b.classList.add('selected');
+      confIdx = i;
+      checkReady();
+    });
+    confRow.appendChild(b);
+  });
+  function checkReady(){
+    document.getElementById('catchBtn').disabled = !(stratIdx!==null && confIdx!==null);
+  }
+  document.getElementById('catchBtn').addEventListener('click', ()=>{
+    state.records[f.id].strategy = f.strategies[stratIdx];
+    state.records[f.id].strategyCatIdx = stratIdx;
+    state.records[f.id].confidence = CONFIDENCE[confIdx];
+    state.records[f.id].explain = f.explain;
+    doCatchAnimation(f, pie, stage);
+  });
+  overlay.querySelector('[data-close]').addEventListener('click', ()=>{ state.battle=null; closeModal(); });
+}
+
+function doCatchAnimation(f, pieEl, stage){
+  document.querySelectorAll('.choice-btn, .conf-btn, #catchBtn').forEach(b=>b.disabled=true);
+  const sparkleLayer = document.createElement('div');
+  sparkleLayer.className = 'sparkle-layer';
+  stage.style.position = 'relative';
+  stage.appendChild(sparkleLayer);
+  const emojis = ['✨','⭐','🌟','💫'];
+  for(let i=0;i<10;i++){
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.textContent = emojis[i%emojis.length];
+    const angle = (i/10)*2*Math.PI;
+    s.style.setProperty('--dx', (Math.cos(angle)*70)+'px');
+    s.style.setProperty('--dy', (Math.sin(angle)*70)+'px');
+    s.style.left = '50%'; s.style.top='20px';
+    s.style.animationDelay = (i*30)+'ms';
+    sparkleLayer.appendChild(s);
+  }
+  pieEl.classList.add('faint');
+  sfxCatch();
+  setTimeout(()=>{
+    state.caught[f.id] = true;
+    state.levelResolved[f.id] = true;
+    state.battle = null;
+    updateProgress();
+    refreshCaughtTiles();
+    updateProximityGlow();
+    closeModal();
+    saveProgress();
+    if(Object.keys(state.levelResolved).length === state.sessionFractlingIds.length){
+      setTimeout(()=> renderLevelComplete(state.level), 400);
+    } else {
+      toast(`${f.name} was added to your Journal! 📖`);
+    }
+  }, 950);
+}
+
+function toast(msg){
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = `position:fixed;left:50%;bottom:26px;transform:translateX(-50%);
+    background:#2A3B2A;color:#fff;padding:10px 18px;border-radius:999px;font-weight:800;
+    font-size:0.85em;box-shadow:0 6px 16px rgba(0,0,0,0.3);z-index:200;font-family:'Nunito';`;
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.transition='opacity .4s'; t.style.opacity='0'; setTimeout(()=>t.remove(),400); }, 1800);
+}
+
+function updateProgress(){
+  const n = Object.keys(state.levelResolved).length;
+  const total = state.sessionFractlingIds.length || 10;
+  document.getElementById('progressText').textContent = `${n}/${total}`;
+  document.getElementById('progressBarInner').style.width = (n/total*100)+'%';
+  const lvlLabel = document.getElementById('levelLabel');
+  if(lvlLabel){
+    const names = {1:'Level 1 · Explore', 2:'Level 2 · Bonus Round', 3:'Level 3 · Boss Battle'};
+    lvlLabel.textContent = names[state.level] || ('Level '+state.level);
+  }
+}
+
+/* ================= TRAINER BATTLES ================= */
+function startTrainerBattle(key){
+  if(state.trainerBattle) return;
+  const t = TRAINERS[key];
+  const pool = shuffleArray([...TRAINER_POOL]);
+  const qs = pool.slice(0,3);
+  state.trainerBattle = {key, qIndex:0, correctCount:0, questions:qs, wrongThisQ:0, missed:[]};
+  renderTrainerIntro(key, t);
+}
+
+function renderTrainerIntro(key, t){
+  const overlay = openModal(`
+    <button class="modal-close" data-close>×</button>
+    <div class="dialog-head" style="background:linear-gradient(180deg,#7BC1EE,#4E9FDA);">
+      <span class="avatar">${t.avatar}</span><span class="name" style="color:#fff;">${t.name}</span>
+    </div>
+    <div class="dialog-body"><div class="bubble">${t.intro}</div></div>
+    <div class="dialog-foot">
+      <button class="btn-secondary" data-close style="margin-right:8px;">Not now</button>
+      <button class="btn-primary" id="beginTrainerBtn">⚔️ Begin Battle</button>
+    </div>
+  `);
+  overlay.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click', ()=>{ state.trainerBattle=null; closeModal(); }));
+  document.getElementById('beginTrainerBtn').addEventListener('click', renderTrainerQuestion);
+}
+
+function renderTrainerQuestion(){
+  const tb = state.trainerBattle;
+  const t = TRAINERS[tb.key];
+  const f = tb.questions[tb.qIndex];
+  tb.wrongThisQ = 0;
+  const overlay = openModal(`
+    <button class="modal-close" data-close>×</button>
+    <div class="battle-head">
+      <h3>${t.name}'s Challenge</h3>
+      <div class="sub">Question ${tb.qIndex+1} of ${tb.questions.length}</div>
+    </div>
+    <div class="creature-stage" id="creatureStage">
+      <div class="creature-name">${f.name}</div>
+      <div class="creature-tag">${f.tag}</div>
+    </div>
+    <div class="battle-body">
+      <div class="q-box">${formatFractionText(f.question)}</div>
+      <div class="feedback" id="trainerFeedback"></div>
+      <div class="options" id="trainerOptionsWrap"></div>
+    </div>
+  `);
+  const stage = document.getElementById('creatureStage');
+  const pie = makePieEl(f, 90);
+  pie.id = 'trainerPie';
+  stage.insertBefore(pie, stage.firstChild);
+
+  const optsWrap = document.getElementById('trainerOptionsWrap');
+  f.options.forEach((opt, idx)=>{
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    b.innerHTML = formatFractionText(opt);
+    b.addEventListener('click', ()=> handleTrainerAnswer(idx, f));
+    optsWrap.appendChild(b);
+  });
+  overlay.querySelector('[data-close]').addEventListener('click', ()=>{ state.trainerBattle=null; closeModal(); });
+}
+
+function handleTrainerAnswer(idx, f){
+  const tb = state.trainerBattle;
+  const opts = document.querySelectorAll('#trainerOptionsWrap .opt-btn');
+  opts.forEach(b=>b.disabled = true);
+  const feedback = document.getElementById('trainerFeedback');
+  const pie = document.getElementById('trainerPie');
+
+  if(idx === f.correct){
+    opts[idx].classList.add('correct');
+    feedback.textContent = "Correct!";
+    feedback.className = 'feedback good';
+    pie.classList.add('hit');
+    sfxCorrect();
+    if(tb.wrongThisQ===0) tb.correctCount++;
+    else tb.missed.push(f);
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[f.correct].classList.add('correct');
+    feedback.innerHTML = `The correct answer was ${formatFractionText(f.options[f.correct])}`;
+    feedback.className = 'feedback bad';
+    sfxWrong();
+    tb.wrongThisQ++;
+    tb.missed.push(f);
+  }
+  setTimeout(()=>{
+    tb.qIndex++;
+    if(tb.qIndex < tb.questions.length){
+      renderTrainerQuestion();
+    } else {
+      finishTrainerBattle();
+    }
+  }, 1300);
+}
+
+function finishTrainerBattle(){
+  const tb = state.trainerBattle;
+  const t = TRAINERS[tb.key];
+  const total = tb.questions.length;
+  const passed = tb.correctCount >= 2;
+  if(passed){
+    state.trainerBadges[tb.key] = true;
+    if(trainerTileEls[tb.key]) trainerTileEls[tb.key].classList.add('beaten');
+    sfxBadge();
+  }
+  const missedHtml = tb.missed.length ? `
+    <div class="reflect-title" style="text-align:left;margin-top:14px;">Worth a second look</div>
+    ${tb.missed.slice(0,3).map(f=>`
+      <div class="explain-box" style="margin-top:8px;">
+        <b>${f.name}:</b> ${formatFractionText(f.explain)}
+      </div>`).join('')}
+  ` : '';
+  const overlay = openModal(`
+    <button class="modal-close" data-close>×</button>
+    <div class="end-head" style="background:linear-gradient(180deg,${passed?'#B7EAC0,#5FC96B':'#FFD877,#FF9F5A'});">
+      <h2>${passed? '🏅 Badge earned!' : 'Good effort!'}</h2>
+      <div>You scored ${tb.correctCount}/${total} against ${t.name}</div>
+    </div>
+    <div class="end-body">
+      ${passed
+        ? `<p style="font-weight:700;color:#3E5A34;">${t.name} hands you a badge. Come back anytime for more practice!</p>`
+        : `<p style="font-weight:700;color:#5B3A00;">You need 2 out of 3 correct to earn the badge. ${t.name} is happy to rematch anytime!</p>`}
+      ${missedHtml}
+    </div>
+    <div class="end-foot"><button class="btn-primary" id="trainerContinueBtn">Continue</button></div>
+  `);
+  overlay.querySelector('[data-close]').addEventListener('click', closeAfterTrainer);
+  document.getElementById('trainerContinueBtn').addEventListener('click', closeAfterTrainer);
+  function closeAfterTrainer(){
+    state.trainerBattle = null;
+    closeModal();
+    saveProgress();
+  }
+}
+
+
+/* ================= JOURNAL ================= */
+document.getElementById('journalBtn').addEventListener('click', renderJournal);
+
+function renderJournal(){
+  const caughtIds = Object.keys(state.caught).map(Number).sort((a,b)=>a-b);
+  const overlay = openModal(`
+    <button class="modal-close" data-close>×</button>
+    <div class="journal-head">
+      <h3>📖 Fractling Journal</h3>
+      <p>Tap a Fractling to revisit the question &amp; your reflection</p>
+    </div>
+    <div class="journal-grid" id="journalGrid"></div>
+    ${caughtIds.length===0 ? '<div class="dash-empty">You haven\'t caught any Fractlings yet — explore the tall grass!</div>' : ''}
+  `);
+  const grid = document.getElementById('journalGrid');
+  caughtIds.forEach(fid=>{
+    const f = FRACTLINGS.find(x=>x.id===fid);
+    if(!f) return;
+    const slot = document.createElement('div');
+    slot.className = 'slot';
+    const pie = makePieEl(f, 52);
+    pie.style.animation = 'none';
+    slot.appendChild(pie);
+    const nm = document.createElement('div');
+    nm.className = 'slot-name';
+    nm.textContent = f.name;
+    slot.appendChild(nm);
+    slot.addEventListener('click', ()=> renderDetail(f));
+    grid.appendChild(slot);
+  });
+  overlay.querySelector('[data-close]').addEventListener('click', closeModal);
+}
+
+function renderDetail(f){
+  const rec = state.records[f.id];
+  const overlay = openModal(`
+    <button class="modal-close" data-close>×</button>
+    <div class="journal-head">
+      <h3>${f.name}</h3>
+      <p>${f.tag}</p>
+    </div>
+    <div class="detail-body">
+      <div class="detail-q">${formatFractionText(rec.question)}</div>
+      <div class="detail-row"><span class="tag you">You answered</span><span>${formatFractionText(rec.yourAnswer)}</span></div>
+      <div class="detail-row"><span class="tag correct">Correct answer</span><span>${formatFractionText(rec.correctAnswer)}</span></div>
+      <div class="detail-row"><span class="tag strat">Your strategy</span><span>${rec.strategy}</span></div>
+      <div class="detail-row"><span class="tag conf">Confidence</span><span>${rec.confidence}</span></div>
+      <div class="detail-row"><span class="tag you">Tries taken</span><span>${rec.attempts||1}${rec.neededHint? ' (used a hint)':''}</span></div>
+      <div class="explain-box"><b>How to solve it:</b><br>${formatFractionText(rec.explain)}</div>
+    </div>
+    <div class="detail-foot"><button class="btn-secondary" id="backToJournal">← Back to Journal</button></div>
+  `);
+  overlay.querySelector('[data-close]').addEventListener('click', closeModal);
+  document.getElementById('backToJournal').addEventListener('click', renderJournal);
+}
+
+/* ================= END SCREEN ================= */
+function buildSummaryBarsHtml(){
+  const tally = [0,0,0,0];
+  Object.values(state.records).forEach(r=>{
+    if(typeof r.strategyCatIdx === 'number') tally[r.strategyCatIdx]++;
+  });
+  const max = Math.max(...tally,1);
+  const shortLabels = ["Applied a fraction rule","Visualised / drew it","Used another method","Guessed"];
+  return tally.map((v,i)=>`
+    <div class="bar-row">
+      <div class="bar-label">${shortLabels[i]}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(v/max*100)}%"></div></div>
+      <div>${v}</div>
+    </div>`).join('');
+}
+
+function buildBadgeStreakHtml(){
+  const badgeCount = Object.keys(state.trainerBadges).length;
+  return `
+    <div class="detail-row" style="margin-top:6px;">
+      <span class="tag strat">🏅 Trainer badges</span><span>${badgeCount} / ${Object.keys(TRAINERS).length}</span>
+    </div>
+    <div class="detail-row">
+      <span class="tag conf">🔥 Best streak</span><span>${state.bestStreak} in a row, first try</span>
+    </div>`;
+}
+
+function exitNoteHtml(){
+  return `
+    <div class="reflect-title" style="text-align:left;margin-top:14px;">Before you finish up</div>
+    <div class="reflect-sub" style="text-align:left;">Which fraction skill feels solid now? Which would you like more practice on?</div>
+    <textarea id="exitNoteBox" placeholder="e.g. I'm good at comparing fractions now, but adding still trips me up..."
+      style="width:100%;min-height:70px;font-family:'Nunito';font-size:16px;border:2px solid #E1EEF7;
+      border-radius:10px;padding:10px;resize:vertical;">${escapeHtml(state.exitNote||'')}</textarea>`;
+}
+function wireExitNote(){
+  const box = document.getElementById('exitNoteBox');
+  if(box) box.addEventListener('input', ()=>{ state.exitNote = box.value; });
+}
+
+function resetToFreshGame(){
+  state.pos = {...START};
+  state.caught = {};
+  state.records = {};
+  state.battle = null;
+  state.trainerBattle = null;
+  state.bossBattle = null;
+  state.bossPassed = false;
+  state.streak = 0;
+  state.level = 1;
+  state.exitNote = '';
+  assignSlots();
+  assignTrainerPositions();
+  initMap();
+  updateProgress();
+  updateStreakUI();
+  closeModal();
+}
+
+function renderLevelComplete(level){
+  const copy = {
+    1:{title:'🏁 Level 1 Complete!', sub:"You've explored the fraction basics — nice work!", nextLabel:'➡️ Bonus Round'},
+    2:{title:'🎉 Bonus Round Complete!', sub:'You tackled fresh Fractlings and revisited your trickiest ones.', nextLabel:'⚔️ Final Challenge'},
+  }[level];
+
+  const overlay = openModal(`
+    <button class="modal-close" data-close>×</button>
+    <div class="end-head">
+      <h2>${copy.title}</h2>
+      <div>${copy.sub}</div>
+    </div>
+    <div class="end-body">
+      <div class="reflect-title" style="text-align:left;">Your strategies, at a glance</div>
+      ${buildSummaryBarsHtml()}
+      ${buildBadgeStreakHtml()}
+      ${exitNoteHtml()}
+    </div>
+    <div class="end-foot">
+      <button class="btn-secondary" id="openJournalFromEnd">📖 Journal</button>
+      <button class="btn-secondary" id="exportFromEnd">📤 Share Results</button>
+      <button class="btn-secondary" id="stopHereBtn">🏁 Stop Here</button>
+      <button class="btn-primary" id="continueLevelBtn">${copy.nextLabel} →</button>
+    </div>
+  `);
+  wireExitNote();
+  overlay.querySelector('[data-close]').addEventListener('click', closeModal);
+  document.getElementById('openJournalFromEnd').addEventListener('click', renderJournal);
+  document.getElementById('exportFromEnd').addEventListener('click', renderExportModal);
+  document.getElementById('stopHereBtn').addEventListener('click', ()=>{
+    saveProgress();
+    closeModal();
+    toast('Great session! Come back anytime to continue exploring. 🌿');
+  });
+  document.getElementById('continueLevelBtn').addEventListener('click', ()=>{
+    closeModal();
+    if(level===1){
+      renderBonusChoice();
+    } else if(level===2){
+      startBossBattle();
+    }
+  });
+  if(level===1){
+    const skipRow = document.createElement('div');
+    skipRow.style.cssText = 'text-align:center;padding:0 20px 18px;';
+    skipRow.innerHTML = `<button class="teacher-link" id="skipToBossBtn" style="color:#5B7F99;">Or skip straight to the Boss Battle →</button>`;
+    overlay.querySelector('.end-body').after(skipRow);
+    document.getElementById('skipToBossBtn').addEventListener('click', ()=>{
+      closeModal();
+      startBossBattle();
+    });
+  }
+}
+
+function renderBonusChoice(){
+  const unusedCount = FRACTLINGS.length - state.level1TargetIds.length;
+  const overlay = openModal(`
+    <button class="modal-close" data-close>×</button>
+    <div class="journal-head" style="background:linear-gradient(180deg,#63C97D,#3FA25B);">
+      <h3>🌟 Choose Your Bonus Round</h3>
+      <p>You pick what this round focuses on</p>
+    </div>
+    <div class="choice-list" style="padding:16px 20px 4px;">
+      <button class="choice-btn" id="modeNew" style="font-size:0.95em;">
+        🆕 <b>New Territory</b><br><span style="font-weight:600;font-size:0.9em;">Meet ${unusedCount} brand-new Fractlings you haven't seen yet.</span>
+      </button>
+      <button class="choice-btn" id="modeReview" style="font-size:0.95em;">
+        🔁 <b>Rematch Trail</b><br><span style="font-weight:600;font-size:0.9em;">Revisit your trickiest questions from Level 1 for extra practice.</span>
+      </button>
+      <button class="choice-btn" id="modeMixed" style="font-size:0.95em;">
+        🎲 <b>Mixed Trail</b><br><span style="font-weight:600;font-size:0.9em;">A bit of both — new Fractlings plus your toughest rematches.</span>
+      </button>
+    </div>
+    <div class="detail-foot"></div>
+  `);
+  overlay.querySelector('[data-close]').addEventListener('click', closeModal);
+  const go = (mode)=>{
+    closeModal();
+    state.level = 2;
+    assignSlots(mode);
+    assignTrainerPositions();
+    initMap();
+    updateProgress();
+    const msgs = {new:'New Territory unlocked — 6 fresh Fractlings await! 🌟', review:'Rematch Trail begins — time to conquer your trickiest ones! 🔁', mixed:'Bonus Round begins! New Fractlings + your trickiest rematches. 🌟'};
+    toast(msgs[mode]);
+  };
+  document.getElementById('modeNew').addEventListener('click', ()=>go('new'));
+  document.getElementById('modeReview').addEventListener('click', ()=>go('review'));
+  document.getElementById('modeMixed').addEventListener('click', ()=>go('mixed'));
+}
+
+/* ================= BOSS BATTLE (Level 3) ================= */
+function startBossBattle(){
+  state.level = 3;
+  state.bossBattle = {qIndex:0, correctCount:0, questions: shuffleArray([...BOSS_POOL]).slice(0,6), missed:[]};
+  updateProgress();
+  renderBossIntro();
+}
+
+function renderBossIntro(){
+  const overlay = openModal(`
+    <button class="modal-close" data-close>×</button>
+    <div class="end-head" style="background:linear-gradient(180deg,#FFD877,#E0933F);">
+      <h2>⚔️ The Fraction Boss Battle</h2>
+      <div>6 brand-new, multi-step questions you won't have seen before. Score 4 or more to earn your Fraction Master badge!</div>
+    </div>
+    <div class="end-foot"><button class="btn-primary" id="beginBossBtn">Begin</button></div>
+  `);
+  overlay.querySelector('[data-close]').addEventListener('click', closeModal);
+  document.getElementById('beginBossBtn').addEventListener('click', renderBossQuestion);
+}
+
+function renderBossQuestion(){
+  const bb = state.bossBattle;
+  const f = bb.questions[bb.qIndex];
+  const overlay = openModal(`
+    <button class="modal-close" data-close>×</button>
+    <div class="battle-head" style="background:linear-gradient(180deg,#FFD877,#E0933F);">
+      <h3>Boss Battle</h3>
+      <div class="sub">Question ${bb.qIndex+1} of ${bb.questions.length}</div>
+    </div>
+    <div class="creature-stage" id="creatureStage">
+      <div class="creature-name">${f.name}</div>
+      <div class="creature-tag">${f.tag}</div>
+    </div>
+    <div class="battle-body">
+      <div class="q-box">${formatFractionText(f.question)}</div>
+      <div class="feedback" id="bossFeedback"></div>
+      <div class="options" id="bossOptionsWrap"></div>
+    </div>
+  `);
+  const stage = document.getElementById('creatureStage');
+  const pie = makePieEl(f, 90);
+  pie.id = 'bossPie';
+  stage.insertBefore(pie, stage.firstChild);
+
+  const optsWrap = document.getElementById('bossOptionsWrap');
+  f.options.forEach((opt, idx)=>{
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    b.innerHTML = formatFractionText(opt);
+    b.addEventListener('click', ()=> handleBossAnswer(idx, f));
+    optsWrap.appendChild(b);
+  });
+  overlay.querySelector('[data-close]').addEventListener('click', closeModal);
+}
+
+function handleBossAnswer(idx, f){
+  const bb = state.bossBattle;
+  const opts = document.querySelectorAll('#bossOptionsWrap .opt-btn');
+  opts.forEach(b=>b.disabled = true);
+  const feedback = document.getElementById('bossFeedback');
+  const pie = document.getElementById('bossPie');
+
+  if(idx === f.correct){
+    opts[idx].classList.add('correct');
+    feedback.textContent = "Correct!";
+    feedback.className = 'feedback good';
+    pie.classList.add('hit');
+    sfxCorrect();
+    bb.correctCount++;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[f.correct].classList.add('correct');
+    feedback.innerHTML = `The correct answer was ${formatFractionText(f.options[f.correct])}`;
+    feedback.className = 'feedback bad';
+    sfxWrong();
+    bb.missed.push(f);
+  }
+  setTimeout(()=>{
+    bb.qIndex++;
+    if(bb.qIndex < bb.questions.length){
+      renderBossQuestion();
+    } else {
+      finishBoss();
+    }
+  }, 1300);
+}
+
+function finishBoss(){
+  const bb = state.bossBattle;
+  const total = bb.questions.length;
+  const passed = bb.correctCount >= 4;
+  state.bossPassed = passed;
+  if(passed) sfxBadge();
+  saveProgress();
+
+  const missedHtml = bb.missed.length ? `
+    <div class="reflect-title" style="text-align:left;margin-top:14px;">Worth a second look</div>
+    ${bb.missed.slice(0,3).map(f=>`
+      <div class="explain-box" style="margin-top:8px;"><b>${f.name}:</b> ${formatFractionText(f.explain)}</div>
+    `).join('')}
+  ` : '';
+
+  const overlay = openModal(`
+    <button class="modal-close" data-close>×</button>
+    <div class="end-head" style="background:linear-gradient(180deg,${passed?'#FFE08A,#F5B942':'#FFD877,#FF9F5A'});">
+      <h2>${passed? '🎓 Fraction Master!' : 'So close!'}</h2>
+      <div>${state.playerName} scored ${bb.correctCount}/${total} in the Boss Battle</div>
+    </div>
+    <div class="end-body">
+      ${passed
+        ? `<p style="font-weight:700;color:#5B3A00;">You've completed the whole Fraction Trail — explorer, bonus rematches, and the boss battle. Amazing work!</p>`
+        : `<p style="font-weight:700;color:#5B3A00;">You need 4 out of 6 correct for the Fraction Master badge. Want to retake just the Boss Battle?</p>`}
+      ${missedHtml}
+      ${exitNoteHtml()}
+    </div>
+    <div class="end-foot">
+      <button class="btn-secondary" id="openJournalFromBoss">📖 Journal</button>
+      <button class="btn-secondary" id="exportFromBoss">📤 Share Results</button>
+      ${passed ? '' : '<button class="btn-secondary" id="retryBossBtn">🔁 Retry Boss</button>'}
+      <button class="btn-primary" id="restartBtn">🔄 Play Again</button>
+    </div>
+  `);
+  wireExitNote();
+  overlay.querySelector('[data-close]').addEventListener('click', closeModal);
+  document.getElementById('openJournalFromBoss').addEventListener('click', renderJournal);
+  document.getElementById('exportFromBoss').addEventListener('click', renderExportModal);
+  document.getElementById('restartBtn').addEventListener('click', resetToFreshGame);
+  if(!passed){
+    document.getElementById('retryBossBtn').addEventListener('click', ()=>{
+      closeModal();
+      startBossBattle();
+    });
+  }
+}
+
+
+/* ================= TEACHER TRACKING (shared storage) ================= */
+function slugify(name){
+  return (name||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,40) || 'anonymous';
+}
+
+
+async function saveProgress(){
+  if(!state.storageKey || typeof window.storage === 'undefined') return;
+  const payload = {
+    name: state.playerName,
+    updatedAt: Date.now(),
+    level: state.level,
+    bossPassed: state.bossPassed,
+    caughtCount: Object.keys(state.caught).length,
+    trainerBadges: Object.keys(state.trainerBadges),
+    bestStreak: state.bestStreak,
+    exitNote: state.exitNote,
+    records: Object.entries(state.records).map(([fid, r])=>{
+      const f = FRACTLINGS.find(x=>String(x.id)===String(fid));
+      return {
+        fractling: f? f.name : fid,
+        tag: f? f.tag : '',
+        question: r.question,
+        yourAnswer: r.yourAnswer,
+        correctAnswer: r.correctAnswer,
+        attempts: r.attempts,
+        neededHint: r.neededHint,
+        strategy: r.strategy,
+        confidence: r.confidence
+      };
+    })
+  };
+  try{
+    await window.storage.set(state.storageKey, JSON.stringify(payload), true);
+  }catch(e){
+    console.error('Could not save progress:', e);
+  }
+}
+
+function timeAgo(ts){
+  const diff = Math.max(0, Date.now()-ts);
+  const mins = Math.floor(diff/60000);
+  if(mins < 1) return 'just now';
+  if(mins < 60) return mins+'m ago';
+  const hrs = Math.floor(mins/60);
+  if(hrs < 24) return hrs+'h ago';
+  return Math.floor(hrs/24)+'d ago';
+}
+
+async function renderDashboard(){
+  const overlay = openModal(`
+    <button class="modal-close" data-close>×</button>
+    <div class="journal-head" style="background:linear-gradient(180deg,#4E9FDA,#2E6FA8);">
+      <h3>👩‍🏫 Class Dashboard</h3>
+      <p>Live progress from every student who has played on this device or link</p>
+    </div>
+    <div id="dashContent"><div class="dash-empty">Checking for class data…</div></div>
+    <div class="detail-foot">
+      <button class="btn-secondary" id="dashRefreshBtn">🔄 Refresh</button>
+    </div>
+  `);
+  overlay.querySelector('[data-close]').addEventListener('click', closeModal);
+  document.getElementById('dashRefreshBtn').addEventListener('click', renderDashboard);
+  await loadDashboardData();
+}
+
+async function loadDashboardData(){
+  const content = document.getElementById('dashContent');
+  if(!content) return;
+  if(typeof window.storage === 'undefined'){
+    content.innerHTML = `<div class="dash-empty">
+      Live syncing isn't available for this copy of the game — it only works in certain hosting setups.<br><br>
+      Instead, ask each student to tap <b>📤 My Results</b> (top bar during play, or on the finish screen) and send you
+      what it produces — by email, Google Classroom upload, or a shared drive folder. You can then skim each one, or
+      paste them into a spreadsheet together.
+    </div>`;
+    return;
+  }
+  let keysRes;
+  try{
+    keysRes = await window.storage.list('ft_response:', true);
+  }catch(e){
+    content.innerHTML = `<div class="dash-empty">Couldn't load class data right now — try the 📤 My Results export instead (top bar / finish screen).</div>`;
+    return;
+  }
+  const keys = (keysRes && keysRes.keys) || [];
+  if(keys.length===0){
+    content.innerHTML = `<div class="dash-empty">No student data yet — play the game to create your first entry!</div>`;
+    return;
+  }
+  const students = [];
+  for(const k of keys){
+    try{
+      const res = await window.storage.get(k, true);
+      if(res && res.value) students.push(JSON.parse(res.value));
+    }catch(e){ /* skip unreadable entry */ }
+  }
+  students.sort((a,b)=> b.updatedAt - a.updatedAt);
+
+  const rows = students.map(s=>`
+    <tr>
+      <td>${s.name||'Anonymous'}</td>
+      <td>${s.level===3 ? (s.bossPassed?'L3 🎓':'L3') : 'L'+(s.level||1)}</td>
+      <td>${s.caughtCount||0} caught</td>
+      <td>${(s.trainerBadges||[]).length}/${Object.keys(TRAINERS).length}</td>
+      <td>${s.bestStreak||0}</td>
+      <td>${timeAgo(s.updatedAt)}</td>
+    </tr>`).join('');
+
+  // Class-wide difficulty: average attempts per Fractling across students who caught it
+  const diff = {};
+  students.forEach(s=>{
+    (s.records||[]).forEach(r=>{
+      if(!diff[r.fractling]) diff[r.fractling] = {sum:0,count:0,tag:r.tag};
+      diff[r.fractling].sum += (r.attempts||1);
+      diff[r.fractling].count++;
+    });
+  });
+  const diffRows = Object.entries(diff)
+    .map(([name,d])=>({name, tag:d.tag, avg: d.sum/d.count}))
+    .sort((a,b)=> b.avg-a.avg)
+    .slice(0,5);
+  const diffHtml = diffRows.length ? diffRows.map(d=>`
+      <div class="bar-row">
+        <div class="bar-label">${d.name} (${d.tag})</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100, d.avg/3*100)}%"></div></div>
+        <div>${d.avg.toFixed(1)} tries avg</div>
+      </div>`).join('') : '';
+
+  content.innerHTML = `
+    <div class="dash-wrap">
+      <table class="dash-table">
+        <thead><tr><th>Student</th><th>Level</th><th>Caught</th><th>Badges</th><th>Best streak</th><th>Last active</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    ${diffHtml? `<div class="dash-summary">Questions needing the most tries, class-wide:</div>
+    <div style="padding:0 20px 4px;">${diffHtml}</div>` : ''}
+    <div class="dash-note">Data is shared across everyone using this game link — student names are self-entered and not verified.</div>
+  `;
+}
+
+
+/* ================= EXPORT MY RESULTS (works everywhere, no backend needed) ================= */
+function stripTags(html){ return String(html).replace(/<[^>]*>/g,''); }
+function escapeHtml(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function buildResultsText(){
+  const caughtIds = Object.keys(state.caught).map(Number).sort((a,b)=>a-b);
+  const levelNames = {1:'Level 1 (Explore)', 2:'Level 2 (Bonus Round)', 3:'Level 3 (Boss Battle)'};
+  const lines = [];
+  lines.push('Fraction Trails — Results');
+  lines.push('Name: ' + state.playerName);
+  lines.push('Date: ' + new Date().toLocaleString());
+  lines.push('Furthest level reached: ' + (levelNames[state.level] || state.level));
+  if(state.level===3) lines.push('Boss Battle result: ' + (state.bossPassed ? 'PASSED — 🎓 Fraction Master!' : 'Not yet passed'));
+  lines.push('Fractlings caught: ' + caughtIds.length);
+  lines.push('Trainer badges: ' + Object.keys(state.trainerBadges).length + '/' + Object.keys(TRAINERS).length);
+  lines.push('Best streak (first-try, in a row): ' + state.bestStreak);
+  if(state.exitNote && state.exitNote.trim()){
+    lines.push('');
+    lines.push('Student reflection: ' + state.exitNote.trim());
+  }
+  lines.push('');
+  lines.push('Fractling-by-fractling:');
+  caughtIds.forEach((fid, i)=>{
+    const f = FRACTLINGS.find(x=>x.id===fid);
+    const r = state.records[fid];
+    if(!f || !r) return;
+    lines.push((i+1)+'. '+f.name+' ('+f.tag+')');
+    lines.push('   Question: '+stripTags(f.question));
+    lines.push('   Your answer: '+r.yourAnswer+' — '+(r.attempts||1)+' tr'+((r.attempts||1)===1?'y':'ies')+(r.neededHint?', used a hint':''));
+    lines.push('   Strategy: '+stripTags(r.strategy));
+    lines.push('   Confidence: '+r.confidence);
+    lines.push('');
+  });
+  return lines.join('\n');
+}
+
+function copyResultsText(text){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text)
+      .then(()=> toast('Copied! Paste it wherever your teacher wants it.'))
+      .catch(()=> fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try{ document.execCommand('copy'); toast('Copied!'); }
+  catch(e){ toast('Please select the text above and copy it manually.'); }
+  document.body.removeChild(ta);
+}
+function downloadResultsText(text){
+  try{
+    const blob = new Blob([text], {type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'FractionTrails_' + slugify(state.playerName) + '.txt';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('Downloaded! Send that file to your teacher.');
+  }catch(e){
+    toast('Download not supported here — try Copy instead.');
+  }
+}
+
+function renderExportModal(){
+  const text = buildResultsText();
+  const overlay = openModal(`
+    <button class="modal-close" data-close>×</button>
+    <div class="journal-head" style="background:linear-gradient(180deg,#63C97D,#3FA25B);">
+      <h3>📤 My Results</h3>
+      <p>Share this with your teacher — by email, Google Classroom, or a shared drive folder</p>
+    </div>
+    <div style="padding:14px 20px 4px;">
+      <textarea id="exportText" readonly style="width:100%;height:200px;font-family:monospace;font-size:15px;
+        border:2px solid #E1EEF7;border-radius:10px;padding:10px;resize:vertical;">${escapeHtml(text)}</textarea>
+    </div>
+    <div class="end-foot">
+      <button class="btn-secondary" id="copyResultsBtn">📋 Copy</button>
+      <button class="btn-primary" id="downloadResultsBtn">⬇️ Download .txt</button>
+    </div>
+  `);
+  overlay.querySelector('[data-close]').addEventListener('click', closeModal);
+  document.getElementById('copyResultsBtn').addEventListener('click', ()=> copyResultsText(text));
+  document.getElementById('downloadResultsBtn').addEventListener('click', ()=> downloadResultsText(text));
+}
+
+/* ================= START ================= */
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  const rawName = document.getElementById('nameInput').value.trim();
+  state.playerName = rawName || ('Explorer' + Math.floor(100+Math.random()*900));
+  state.storageKey = 'ft_response:' + slugify(state.playerName) + '_' + Math.random().toString(36).slice(2,6);
+  document.getElementById('screen-title').classList.add('hidden');
+  document.getElementById('screen-game').classList.remove('hidden');
+  assignSlots();
+  assignTrainerPositions();
+  initMap();
+  updateProgress();
+  updateStreakUI();
+  saveProgress();
+});
+
+document.getElementById('teacherLinkBtn').addEventListener('click', renderDashboard);
+document.getElementById('exportBtn').addEventListener('click', renderExportModal);
+
+document.getElementById('muteBtn').addEventListener('click', ()=>{
+  state.muted = !state.muted;
+  document.getElementById('muteBtn').textContent = state.muted ? '🔇' : '🔊';
+});
+
+})();
+</script>
+</body>
+</html>
