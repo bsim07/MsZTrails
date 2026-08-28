@@ -112,6 +112,22 @@ function sfxWrong(){ playTone(160,0.22,'sawtooth',0.12,0); }
 function sfxCatch(){ [660,880,1100,1320].forEach((f,i)=>playTone(f,0.16,'sine',0.15,i*110)); }
 function sfxBadge(){ [520,660,780,1040,1320].forEach((f,i)=>playTone(f,0.18,'triangle',0.16,i*100)); }
 function sfxDecoy(){ playTone(300,0.1,'sine',0.08,0); }
+function sfxFootstep(){
+  playTone(120,0.06,'triangle',0.04,0);
+}
+function sfxEncounter(){
+  playTone(523,0.12,'sine',0.12,0);
+  playTone(659,0.14,'sine',0.12,80);
+}
+function sfxGuide(){
+  playTone(440,0.18,'sine',0.12,0);
+  playTone(554,0.22,'sine',0.1,150);
+}
+function sfxTrainerAppear(){
+  playTone(196,0.16,'sawtooth',0.14,0);
+  playTone(247,0.18,'sawtooth',0.14,120);
+  playTone(294,0.22,'sawtooth',0.14,240);
+}
 
 /* ================= BACKGROUND MUSIC (procedural, no files needed) ================= */
 let bgmNodes = null; // { ctx, o, g, interval }
@@ -466,9 +482,11 @@ function tryMove(dx,dy){
   positionPlayer();
   updateCamera();
   updateProximityGlow();
+  sfxFootstep();
   setTimeout(()=> setPlayerWalking(false), 180);
   const trainerKey = state.trainerPositions[nr+','+nc];
   if(trainerKey){
+    sfxTrainerAppear();
     startTrainerBattle(trainerKey);
     return;
   }
@@ -478,9 +496,11 @@ function tryMove(dx,dy){
     if(fid===null || fid===undefined){
       showDecoyRustle(slotIdx);
     } else if(!state.levelResolved[fid]){
+      sfxEncounter();
       startEncounter(fid);
     }
   } else if(val && val[0]==='N'){
+    sfxGuide();
     openGuideDialog(val);
   }
 }
