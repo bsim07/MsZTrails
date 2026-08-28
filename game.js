@@ -125,30 +125,41 @@ const BGM_NOTES = [
 function playBgmNote(){
   if(state.muted) return;
   const ctx = ensureAudio(); if(!ctx) return;
-  if(ctx.state === 'suspended') ctx.resume();
   const freq = BGM_NOTES[bgmStep % BGM_NOTES.length];
   const o = ctx.createOscillator();
   const g = ctx.createGain();
   const f = ctx.createBiquadFilter();
-  o.type = 'triangle';
+  o.type = 'sine';
   o.frequency.value = freq;
   f.type = 'lowpass';
-  f.frequency.value = 800;
-  g.gain.value = 0.06;
+  f.frequency.value = 1200;
+  f.Q.value = 0;
+  g.gain.value = 0;
   o.connect(f); f.connect(g); g.connect(ctx.destination);
   const t = ctx.currentTime;
+  const attack = 0.08;
+  const release = 0.55;
+  const peak = 0.12;
   o.start(t);
   g.gain.setValueAtTime(0, t);
-  g.gain.linearRampToValueAtTime(0.06, t+0.04);
-  g.gain.exponentialRampToValueAtTime(0.001, t+0.7);
-  o.stop(t+0.8);
+  g.gain.linearRampToValueAtTime(peak, t+attack);
+  g.gain.exponentialRampToValueAtTime(0.001, t+attack+release);
+  o.stop(t+attack+release+0.05);
   bgmStep++;
 }
 function startBackgroundMusic(){
   if(bgmInterval) return;
   bgmStep = 0;
-  playBgmNote();
-  bgmInterval = setInterval(playBgmNote, 700);
+  const ctx = ensureAudio();
+  if(ctx && ctx.state === 'suspended'){
+    ctx.resume().then(()=>{
+      playBgmNote();
+      bgmInterval = setInterval(playBgmNote, 800);
+    });
+  } else {
+    playBgmNote();
+    bgmInterval = setInterval(playBgmNote, 800);
+  }
 }
 function stopBackgroundMusic(){
   if(bgmInterval){ clearInterval(bgmInterval); bgmInterval = null; }
@@ -1479,7 +1490,7 @@ function renderExportModal(){
 
 /* ================= START / INIT ================= */
 function initFractionTrails(){
-document.getElementById('startBtn').addEventListener('click', ()=>{
+document.getElementById('startBtn').addEventListener('click', async ()=>{
   const rawName = document.getElementById('nameInput').value.trim();
   state.playerName = rawName || ('Explorer' + Math.floor(100+Math.random()*900));
   state.storageKey = 'ft_response:' + slugify(state.playerName) + '_' + Math.random().toString(36).slice(2,6);
@@ -1493,6 +1504,8 @@ document.getElementById('startBtn').addEventListener('click', ()=>{
   updateProgress();
   updateStreakUI();
   saveProgress();
+  const ctx = ensureAudio();
+  if(ctx && ctx.state === 'suspended') await ctx.resume();
   startBackgroundMusic();
 });
 
