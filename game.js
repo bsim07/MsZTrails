@@ -113,6 +113,56 @@ function sfxCatch(){ [660,880,1100,1320].forEach((f,i)=>playTone(f,0.16,'sine',0
 function sfxBadge(){ [520,660,780,1040,1320].forEach((f,i)=>playTone(f,0.18,'triangle',0.16,i*100)); }
 function sfxDecoy(){ playTone(300,0.1,'sine',0.08,0); }
 
+/* ================= BACKGROUND MUSIC (procedural, no files needed) ================= */
+let bgmInterval = null;
+let bgmStep = 0;
+const BGM_NOTES = [
+  261.63,329.63,392.00,523.25,
+  329.63,392.00,523.25,659.25,
+  392.00,440.00,523.25,659.25,
+  329.63,392.00,440.00,523.25
+];
+function playBgmNote(){
+  if(state.muted) return;
+  const ctx = ensureAudio(); if(!ctx) return;
+  if(ctx.state === 'suspended') ctx.resume();
+  const freq = BGM_NOTES[bgmStep % BGM_NOTES.length];
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  const f = ctx.createBiquadFilter();
+  o.type = 'triangle';
+  o.frequency.value = freq;
+  f.type = 'lowpass';
+  f.frequency.value = 800;
+  g.gain.value = 0.06;
+  o.connect(f); f.connect(g); g.connect(ctx.destination);
+  const t = ctx.currentTime;
+  o.start(t);
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(0.06, t+0.04);
+  g.gain.exponentialRampToValueAtTime(0.001, t+0.7);
+  o.stop(t+0.8);
+  bgmStep++;
+}
+function startBackgroundMusic(){
+  if(bgmInterval) return;
+  bgmStep = 0;
+  playBgmNote();
+  bgmInterval = setInterval(playBgmNote, 700);
+}
+function stopBackgroundMusic(){
+  if(bgmInterval){ clearInterval(bgmInterval); bgmInterval = null; }
+}
+function toggleAudioMute(){
+  state.muted = !state.muted;
+  document.getElementById('muteBtn').textContent = state.muted ? '🔇' : '🔊';
+  if(state.muted){
+    stopBackgroundMusic();
+  } else {
+    startBackgroundMusic();
+  }
+}
+
 const DECOY_MESSAGES = [
   "🍃 Just rustling leaves... no Fractling here.",
   "🌾 Empty patch — keep exploring!",
@@ -172,6 +222,16 @@ function renderAvatarPicker(){
   });
 }
 renderAvatarPicker();
+
+/* ================= iOS ADD-TO-HOME-SCREEN HINT ================= */
+function showIosInstallHint(){
+  const hint = document.getElementById('iosInstallHint');
+  if(!hint) return;
+  const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  if(isIos && !isStandalone) hint.classList.remove('hidden');
+}
+showIosInstallHint();
 
 /* ================= MAP RENDER ================= */
 const mapGrid = document.getElementById('mapGrid');
@@ -1433,15 +1493,13 @@ document.getElementById('startBtn').addEventListener('click', ()=>{
   updateProgress();
   updateStreakUI();
   saveProgress();
+  startBackgroundMusic();
 });
 
 document.getElementById('teacherLinkBtn').addEventListener('click', renderDashboard);
 document.getElementById('exportBtn').addEventListener('click', renderExportModal);
 
-document.getElementById('muteBtn').addEventListener('click', ()=>{
-  state.muted = !state.muted;
-  document.getElementById('muteBtn').textContent = state.muted ? '🔇' : '🔊';
-});
+document.getElementById('muteBtn').addEventListener('click', toggleAudioMute);
 }
 window.initFractionTrails = initFractionTrails;
 
