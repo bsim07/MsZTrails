@@ -114,55 +114,69 @@ function sfxBadge(){ [520,660,780,1040,1320].forEach((f,i)=>playTone(f,0.18,'tri
 function sfxDecoy(){ playTone(300,0.1,'sine',0.08,0); }
 
 /* ================= BACKGROUND MUSIC (procedural, no files needed) ================= */
-let bgmInterval = null;
-let bgmStep = 0;
-const BGM_NOTES = [
-  261.63,329.63,392.00,523.25,
-  329.63,392.00,523.25,659.25,
-  392.00,440.00,523.25,659.25,
-  329.63,392.00,440.00,523.25
-];
-function playBgmNote(){
-  if(state.muted) return;
-  const ctx = ensureAudio(); if(!ctx) return;
-  const freq = BGM_NOTES[bgmStep % BGM_NOTES.length];
+let bgmNodes = null; // { ctx, o, g, interval }
+const BGM_NOTES = [262,330,392,523,392,330,262,330,392,440,392,330];
+function createBgmOscillator(ctx, freq){
   const o = ctx.createOscillator();
   const g = ctx.createGain();
-  const f = ctx.createBiquadFilter();
-  o.type = 'sine';
+  o.type = 'triangle';
   o.frequency.value = freq;
-  f.type = 'lowpass';
-  f.frequency.value = 1200;
-  f.Q.value = 0;
-  g.gain.value = 0;
-  o.connect(f); f.connect(g); g.connect(ctx.destination);
-  const t = ctx.currentTime;
-  const attack = 0.08;
-  const release = 0.55;
-  const peak = 0.12;
-  o.start(t);
-  g.gain.setValueAtTime(0, t);
-  g.gain.linearRampToValueAtTime(peak, t+attack);
-  g.gain.exponentialRampToValueAtTime(0.001, t+attack+release);
-  o.stop(t+attack+release+0.05);
-  bgmStep++;
+  g.gain.value = 0.05;
+  o.connect(g); g.connect(ctx.destination);
+  return {o, g};
 }
 function startBackgroundMusic(){
-  if(bgmInterval) return;
-  bgmStep = 0;
-  const ctx = ensureAudio();
-  if(ctx && ctx.state === 'suspended'){
-    ctx.resume().then(()=>{
-      playBgmNote();
-      bgmInterval = setInterval(playBgmNote, 800);
-    });
-  } else {
-    playBgmNote();
-    bgmInterval = setInterval(playBgmNote, 800);
+  if(bgmNodes || state.muted) return;
+  const ctx = ensureAudio(); if(!ctx) return;
+  if(ctx.state === 'suspended') ctx.resume();
+
+  const master = ctx.createGain();
+  master.gain.value = 0.35;
+  master.connect(ctx.destination);
+
+  // Drone pad: two long oscillators for ambience
+  const pad1 = ctx.createOscillator(); pad1.type='sine'; pad1.frequency.value=196;
+  const pad1g = ctx.createGain(); pad1g.gain.value=0.04;
+  const pad2 = ctx.createOscillator(); pad2.type='sine'; pad2.frequency.value=246.94;
+  const pad2g = ctx.createGain(); pad2g.gain.value=0.03;
+  pad1.connect(pad1g); pad1g.connect(master);
+  pad2.connect(pad2g); pad2g.connect(master);
+  pad1.start(); pad2.start();
+
+  // Melody loop
+  let step = 0;
+  let lastMelody = null;
+  function playMelodyNote(){
+    if(state.muted || !bgmNodes) return;
+    if(lastMelody){ try{ lastMelody.o.stop(); }catch(e){} }
+    const freq = BGM_NOTES[step % BGM_NOTES.length];
+    const o = ctx.createOscillator(); o.type='sine'; o.frequency.value=freq;
+    const g = ctx.createGain(); g.gain.value=0.12;
+    o.connect(g); g.connect(master);
+    const t = ctx.currentTime;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.12, t+0.05);
+    g.gain.exponentialRampToValueAtTime(0.001, t+0.5);
+    o.start(t); o.stop(t+0.55);
+    lastMelody = {o};
+    step++;
   }
+  playMelodyNote();
+  const interval = setInterval(playMelodyNote, 500);
+
+  bgmNodes = { ctx, master, pad1, pad1g, pad2, pad2g, interval };
 }
 function stopBackgroundMusic(){
-  if(bgmInterval){ clearInterval(bgmInterval); bgmInterval = null; }
+  if(!bgmNodes) return;
+  clearInterval(bgmNodes.interval);
+  try{
+    bgmNodes.pad1.stop();
+    bgmNodes.pad2.stop();
+  }catch(e){}
+  try{
+    bgmNodes.master.disconnect();
+  }catch(e){}
+  bgmNodes = null;
 }
 function toggleAudioMute(){
   state.muted = !state.muted;
