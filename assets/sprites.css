@@ -186,6 +186,21 @@
 .t-grass.near::after,
 .t-grass.hint-glow::before,
 .t-grass.hint-glow::after { content: none !important; display: none !important; }
+.t-bush,
+.t-bush::before,
+.t-bush::after {
+  box-shadow: none !important;
+  background-color: transparent !important;
+  content: none !important;
+  display: none !important;
+}
+.t-bush {
+  display: block !important;
+  background-image: url("tiles.png") !important;
+  background-repeat: no-repeat !important;
+  background-size: calc(128px * var(--px)) calc(80px * var(--px)) !important;
+  background-position: calc(var(--cx) * -16px * var(--px)) calc(var(--cy) * -16px * var(--px)) !important;
+}
 .blade-cluster, .blade, .terrain-sprite,
 .scholar-mei, .scholar-zed { display: none !important; }
 
