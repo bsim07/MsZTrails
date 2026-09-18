@@ -524,6 +524,13 @@ function isVisible(r, c){
 }
 
 document.addEventListener('keydown', (e)=>{
+  const gameScreen = document.getElementById('screen-game');
+  const active = document.activeElement;
+  const editing = active && (
+    active.matches('input, textarea, select') ||
+    active.isContentEditable
+  );
+  if(!gameScreen || gameScreen.classList.contains('hidden') || editing) return;
   const k = e.key.toLowerCase();
   const map = {arrowup:[0,-1], w:[0,-1], arrowdown:[0,1], s:[0,1], arrowleft:[-1,0], a:[-1,0], arrowright:[1,0], d:[1,0]};
   if(map[k]){
