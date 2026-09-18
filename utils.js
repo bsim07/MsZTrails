@@ -15,6 +15,7 @@ function makePieEl(f, size){
   el.dataset.fractling = f.id;
   el.style.setProperty('--fr-id', f.id);
   el.style.setProperty('--fr-rarity', (window.Rarity && Rarity.index(rarity)) || 0);
+  el.style.setProperty('--species-color', f.color);
   el.setAttribute('role', 'img');
   el.setAttribute('aria-label', `${f.name}, a ${rarity} Fractling showing ${f.num} of ${f.den} parts shaded`);
   return el;

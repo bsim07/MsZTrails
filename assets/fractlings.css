@@ -129,28 +129,16 @@
 .rarity-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
   padding: 3px 12px 4px;
   border-radius: 999px;
   font-size: .68em;
   font-weight: 800;
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: var(--fr-ink);
+  color: var(--species-color, var(--fr-ink));
   background: var(--badge-bg, #e8e5e0);
-  border: 2px solid var(--badge-line, #8d887f);
+  border: 2px solid var(--species-color, var(--badge-line, #8d887f));
   white-space: nowrap;
-}
-
-/* A pip row, so rarity is countable and not carried by colour alone — which
-   matters both for colour-blind players and for a projector at the front of a
-   classroom. */
-.rarity-badge::before {
-  content: "";
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--badge-line, #8d887f);
-  box-shadow: var(--badge-pips, none);
 }
 
 .rarity-badge[data-rarity="common"]    { --badge-bg:#eeece8; --badge-line:var(--rarity-common); }

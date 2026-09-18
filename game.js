@@ -644,7 +644,7 @@ function renderBattleFight(f){
     <div class="creature-stage" id="creatureStage" data-rarity="${rarityKey(f)}">
       <div class="creature-name">${f.name}</div>
       <div class="creature-tag">${f.tag}</div>
-      <span class="rarity-badge" data-rarity="${rarityKey(f)}">${rarityLabel(f)} Fractling</span>
+      <span class="rarity-badge" data-rarity="${rarityKey(f)}" style="--species-color:${f.color}">${rarityLabel(f)} Fractling</span>
       <div class="hp-wrap"><div class="hp-bar" id="hpBar"></div></div>
     </div>
     <div class="battle-body">
@@ -1044,6 +1044,7 @@ function renderJournal(){
     const rarity = document.createElement('div');
     rarity.className = 'rarity-badge';
     rarity.dataset.rarity = rarityKey(f);
+    rarity.style.setProperty('--species-color', f.color);
     rarity.textContent = rarityLabel(f);
     slot.appendChild(rarity);
     slot.addEventListener('click', ()=> renderDetail(f));
