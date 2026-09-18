@@ -192,17 +192,15 @@
 /* --------------------------------------------------- proximity + hint cues */
 /* Outlines, not glows: a blur filter on a pixel sprite undoes the pixels. */
 .t-grass.near {
-  outline: calc(var(--px) * 1px) solid var(--gold);
-  outline-offset: calc(var(--px) * -1px);
-  animation: sway 1.6s steps(1, end) infinite, nearPulse .9s steps(2, end) infinite;
-  z-index: 3;
+  outline: none !important;
+  outline-offset: 0;
+  animation: sway 1.6s steps(1, end) infinite;
 }
 @keyframes nearPulse { 0% { outline-color: var(--gold); } 50% { outline-color: transparent; } }
 
 .t-grass.hint-glow {
-  outline: calc(var(--px) * 1px) dashed var(--gold);
-  outline-offset: calc(var(--px) * 1px);
-  z-index: 3;
+  outline: none !important;
+  outline-offset: 0;
 }
 
 /* ================================================================ PLAYER */
