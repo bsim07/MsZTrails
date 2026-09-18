@@ -7,19 +7,16 @@ function pieBackground(numerator, denominator, color){
 }
 
 function makePieEl(f, size){
+  const rarity = (window.Rarity && Rarity.of(f.id)) || 'common';
   const el = document.createElement('div');
-  const rarity = typeof getFractlingRarity === 'function' ? getFractlingRarity(f.id) : {key:'common',label:'Common'};
-  el.className = 'pie fractling-avatar rarity-' + rarity.key;
-  el.dataset.rarity = rarity.key;
-  el.dataset.name = f.name;
-  el.style.width = size+'px';
-  el.style.height = size+'px';
-  el.style.backgroundImage = pieBackground(f.num, f.den, f.color);
-  el.style.setProperty('--ear-color', f.ear);
-  el.innerHTML = `
-    <div class="ear l"></div><div class="ear r"></div>
-    <div class="eye l"></div><div class="eye r"></div>
-    <div class="mouth"></div>`;
+  const scale = size >= 70 ? 'size-md' : 'size-sm';
+  el.className = 'fractling ' + scale;
+  el.dataset.rarity = rarity;
+  el.dataset.fractling = f.id;
+  el.style.setProperty('--fr-id', f.id);
+  el.style.setProperty('--fr-rarity', (window.Rarity && Rarity.index(rarity)) || 0);
+  el.setAttribute('role', 'img');
+  el.setAttribute('aria-label', `${f.name}, a ${rarity} Fractling showing ${f.num} of ${f.den} parts shaded`);
   return el;
 }
 

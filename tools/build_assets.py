@@ -26,7 +26,12 @@ Outputs (all PNG, no interpolation anywhere — display with
     assets/alert.png       12x12   the "!" encounter bubble
     assets/clouds.png      32x6    two drifting clouds, 16x6 cells
     assets/treeline.png   160x40   tileable horizon strip
+    assets/fractlings.png 1400x560  25 species x 5 rarities x 2 frames, 56x56
     assets/atlas.json              cell coordinates for every named sprite
+
+The Fractling sheet is a full species-by-rarity matrix on purpose: rarity is
+decided at runtime from how hard each question turns out to be, so any given
+species has to be able to appear at any tier.
 """
 
 import json
@@ -40,6 +45,7 @@ from pixel import Canvas, save, sheet   # noqa: E402
 import tiles as T                        # noqa: E402
 import chars                             # noqa: E402
 import ui                                # noqa: E402
+import fractlings as FR                  # noqa: E402
 
 OUT = os.path.join(os.path.dirname(HERE), "assets")
 
@@ -153,13 +159,36 @@ def build():
                     "sparkle_2": [32, 0], "puff_0": [48, 0], "puff_1": [64, 0]},
     }
 
+    # ---- Fractlings: every species at every rarity, two frames each
+    species = json.load(open(os.path.join(HERE, "fractling_data.json")))
+    cells, fr_map = [], {}
+    for rarity in range(len(FR.RARITY)):
+        for frame in (0, 1):
+            for spec in species:
+                cells.append(FR.dragon(spec, rarity, frame))
+            row = rarity * 2 + frame
+            for spec in species:
+                fr_map[f"{spec['id']}_{FR.RARITY[rarity]['key']}_{frame}"] = \
+                    [spec["id"] * FR.S, row * FR.S]
+    save(sheet(cells, cols=len(species), cell_w=FR.S, cell_h=FR.S),
+         os.path.join(OUT, "fractlings.png"), indexed=True)
+    atlas["fractlings"] = {
+        "file": "fractlings.png", "cell": [FR.S, FR.S],
+        "cols": len(species),
+        "rarities": [r["key"] for r in FR.RARITY],
+        "row_formula": "rarity_index * 2 + frame",
+        "col_formula": "fractling_id",
+        "sprites": fr_map,
+    }
+
     with open(os.path.join(OUT, "atlas.json"), "w") as f:
         json.dump(atlas, f, indent=2)
 
     for name in sorted(os.listdir(OUT)):
         print(f"  assets/{name}")
     print(f"\n{len(TILE_ORDER)} tiles, {len(frames)} character frames, "
-          f"{len(cards)} avatar cards.")
+          f"{len(cards)} avatar cards, {len(cells)} Fractling frames "
+          f"({len(species)} species x {len(FR.RARITY)} rarities x 2).")
 
 
 if __name__ == "__main__":

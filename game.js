@@ -36,13 +36,13 @@ function assignSlots(mode){
   if(state.level <= 1){
     const allIds = FRACTLINGS.map(f=>f.id);
     if(state.focusTags.length===0){
-      targetIds = chooseRarityWeighted(allIds, 10);
+      targetIds = shuffleArray([...allIds]).slice(0,10);
     } else {
       // Strict filter: a chosen focus should ONLY show that category's questions,
       // never padded out with unrelated ones — a shorter, genuinely-focused round
       // is better than a diluted one.
       const matched = shuffleArray(allIds.filter(id => state.focusTags.includes(FRACTLINGS.find(f=>f.id===id).tag)));
-      targetIds = chooseRarityWeighted(matched, 10);
+      targetIds = matched.slice(0,10);
     }
     state.level1TargetIds = targetIds;
   } else {
@@ -62,6 +62,8 @@ function assignSlots(mode){
     }
   }
   state.sessionFractlingIds = targetIds;
+  state.rarityByFractling = Rarity.assign(targetIds);
+  Rarity.setSession(state.rarityByFractling);
   state.levelResolved = {};
 
   const allSlots = shuffleArray(Array.from({length:TOTAL_SLOTS}, (_,i)=>i));
@@ -72,56 +74,6 @@ function assignSlots(mode){
   filled.forEach((slotIdx, i) => { state.slotAssignment[slotIdx] = order[i]; });
 }
 
-function readClassStats(){
-  try{ return JSON.parse(localStorage.getItem('ft_class_stats_v1') || '{}'); }
-  catch(e){ return {}; }
-}
-
-function rarityScore(id){
-  const stats = readClassStats()[id] || {};
-  const total = (stats.correct||0) + (stats.wrong||0);
-  if(!total) return 0;
-  return (stats.wrong||0) / total;
-}
-
-function getFractlingRarity(id){
-  const score = rarityScore(id);
-  const base = id === 24 ? 'legendary' : (id === 20 || id === 21 ? 'rare' : (id % 5 === 0 ? 'uncommon' : 'common'));
-  const baseInfo = {
-    common:{label:'Common',weight:2.4},
-    uncommon:{label:'Uncommon',weight:1.2},
-    rare:{label:'Rare',weight:.65},
-    legendary:{label:'Legendary',weight:.25}
-  }[base];
-  if(score >= .7) return {key:'legendary', label:'Legendary', weight:.25};
-  if(score >= .5) return {key:'rare', label:'Rare', weight:.65};
-  if(score >= .3) return {key:'uncommon', label:'Uncommon', weight:1.2};
-  return {key:base, label:baseInfo.label, weight:baseInfo.weight};
-}
-
-function chooseRarityWeighted(ids, count){
-  const pool = [...ids];
-  const chosen = [];
-  while(pool.length && chosen.length < count){
-    const weights = pool.map(id=>getFractlingRarity(id).weight);
-    const total = weights.reduce((sum, weight)=>sum+weight, 0);
-    let pick = Math.random() * total;
-    let index = 0;
-    for(; index<pool.length-1; index++){
-      pick -= weights[index];
-      if(pick <= 0) break;
-    }
-    chosen.push(pool.splice(index, 1)[0]);
-  }
-  return chosen;
-}
-
-function recordClassOutcome(id, correct){
-  const stats = readClassStats();
-  stats[id] = stats[id] || {correct:0, wrong:0, students:0};
-  stats[id][correct ? 'correct' : 'wrong']++;
-  try{ localStorage.setItem('ft_class_stats_v1', JSON.stringify(stats)); }catch(e){}
-}
 function slotForFractling(fid){
   return Object.keys(state.slotAssignment).find(k => String(state.slotAssignment[k]) === String(fid));
 }
@@ -196,56 +148,36 @@ function createBgmOscillator(ctx, freq){
 function startBackgroundMusic(){
   if(bgmNodes || state.muted) return;
   const ctx = ensureAudio(); if(!ctx) return;
-  // iOS may reject a promise continuation as no longer being part of the tap.
-  // Resume synchronously, then build the graph immediately within the gesture.
   if(ctx.state === 'suspended') ctx.resume().catch(()=>{});
-
   const master = ctx.createGain();
   master.gain.value = 0.55;
   master.connect(ctx.destination);
-
-  // Drone pad: two long oscillators for ambience
   const pad1 = ctx.createOscillator(); pad1.type='sine'; pad1.frequency.value=196;
   const pad1g = ctx.createGain(); pad1g.gain.value=0.09;
   const pad2 = ctx.createOscillator(); pad2.type='sine'; pad2.frequency.value=246.94;
   const pad2g = ctx.createGain(); pad2g.gain.value=0.07;
-  pad1.connect(pad1g); pad1g.connect(master);
-  pad2.connect(pad2g); pad2g.connect(master);
+  pad1.connect(pad1g); pad1g.connect(master); pad2.connect(pad2g); pad2g.connect(master);
   pad1.start(); pad2.start();
-
-  // Melody loop
   let step = 0;
-  let lastMelody = null;
   function playMelodyNote(){
     if(state.muted) return;
-    if(lastMelody){ try{ lastMelody.o.stop(); }catch(e){} }
-    const freq = BGM_NOTES[step % BGM_NOTES.length];
-    const o = ctx.createOscillator(); o.type='triangle'; o.frequency.value=freq;
-    const g = ctx.createGain(); g.gain.value=0.22;
+    const o = ctx.createOscillator(); o.type='triangle'; o.frequency.value=BGM_NOTES[step++ % BGM_NOTES.length];
+    const g = ctx.createGain(); g.gain.value=0;
     o.connect(g); g.connect(master);
     const t = ctx.currentTime;
-    g.gain.setValueAtTime(0, t);
     g.gain.linearRampToValueAtTime(0.22, t+0.05);
-    g.gain.exponentialRampToValueAtTime(0.001, t+0.55);
-    o.start(t); o.stop(t+0.6);
-    lastMelody = {o};
-    step++;
+    g.gain.exponentialRampToValueAtTime(0.001, t+0.6);
+    o.start(t); o.stop(t+0.65);
   }
   playMelodyNote();
   const interval = setInterval(playMelodyNote, 500);
-
-  bgmNodes = { ctx, master, pad1, pad1g, pad2, pad2g, interval };
+  bgmNodes = {ctx, master, pad1, pad2, interval};
 }
 function stopBackgroundMusic(){
   if(!bgmNodes) return;
   clearInterval(bgmNodes.interval);
-  try{
-    bgmNodes.pad1.stop();
-    bgmNodes.pad2.stop();
-  }catch(e){}
-  try{
-    bgmNodes.master.disconnect();
-  }catch(e){}
+  try{ bgmNodes.pad1.stop(); bgmNodes.pad2.stop(); }catch(e){}
+  try{ bgmNodes.master.disconnect(); }catch(e){}
   bgmNodes = null;
 }
 function toggleAudioMute(){
@@ -699,6 +631,9 @@ function startEncounter(id){
   renderBattleFight(f);
 }
 
+function rarityKey(f){ return (window.Rarity && Rarity.of(f.id)) || 'common'; }
+function rarityLabel(f){ return (window.Rarity && Rarity.LABELS[rarityKey(f)]) || 'Common'; }
+
 function renderBattleFight(f){
   const overlay = openModal(`
     <button class="modal-close" data-close>×</button>
@@ -706,10 +641,10 @@ function renderBattleFight(f){
       <h3>A wild Fractling appeared!</h3>
       <div class="sub">Answer correctly to weaken it</div>
     </div>
-    <div class="creature-stage" id="creatureStage">
+    <div class="creature-stage" id="creatureStage" data-rarity="${rarityKey(f)}">
       <div class="creature-name">${f.name}</div>
       <div class="creature-tag">${f.tag}</div>
-      <div class="rarity-badge rarity-${getFractlingRarity(f.id).key}">${getFractlingRarity(f.id).label} Fractling</div>
+      <span class="rarity-badge" data-rarity="${rarityKey(f)}">${rarityLabel(f)} Fractling</span>
       <div class="hp-wrap"><div class="hp-bar" id="hpBar"></div></div>
     </div>
     <div class="battle-body">
@@ -723,6 +658,8 @@ function renderBattleFight(f){
     </div>
   `);
   const stage = document.getElementById('creatureStage');
+  const modal = stage.closest('.modal-card');
+  if(modal) modal.dataset.rarity = rarityKey(f);
   const pie = makePieEl(f, 110);
   pie.id = 'battlePie';
   stage.insertBefore(pie, stage.firstChild);
@@ -764,7 +701,7 @@ function handleAnswer(idx, f){
     state.records[f.id].attempts = (state.battle.wrongCount||0) + 1;
     state.records[f.id].wrongAttempts = state.battle.wrongCount||0;
     state.records[f.id].neededHint = usedHint;
-    recordClassOutcome(f.id, true);
+    Rarity.record(f.id, true, usedHint);
     if(state.battle.wrongCount===0){
       state.streak++;
       state.bestStreak = Math.max(state.bestStreak, state.streak);
@@ -781,7 +718,7 @@ function handleAnswer(idx, f){
     sfxWrong();
     state.records[f.id] = state.records[f.id] || {question:f.question};
     state.records[f.id].wrongAttempts = (state.records[f.id].wrongAttempts||0) + 1;
-    recordClassOutcome(f.id, false);
+    Rarity.record(f.id, false, false);
     state.battle.wrongCount++;
     state.streak = 0;
     updateStreakUI();
@@ -1013,6 +950,7 @@ function handleTrainerAnswer(idx, f){
     feedback.className = 'feedback good';
     pie.classList.add('hit');
     sfxCorrect();
+    Rarity.record(f.id, true, false);
     if(tb.wrongThisQ===0) tb.correctCount++;
     else tb.missed.push(f);
   } else {
@@ -1021,6 +959,7 @@ function handleTrainerAnswer(idx, f){
     feedback.innerHTML = `The correct answer was ${formatFractionText(f.options[f.correct])}`;
     feedback.className = 'feedback bad';
     sfxWrong();
+    Rarity.record(f.id, false, false);
     tb.wrongThisQ++;
     tb.missed.push(f);
   }
@@ -1103,8 +1042,9 @@ function renderJournal(){
     nm.textContent = f.name;
     slot.appendChild(nm);
     const rarity = document.createElement('div');
-    rarity.className = 'rarity-badge rarity-' + getFractlingRarity(f.id).key;
-    rarity.textContent = getFractlingRarity(f.id).label;
+    rarity.className = 'rarity-badge';
+    rarity.dataset.rarity = rarityKey(f);
+    rarity.textContent = rarityLabel(f);
     slot.appendChild(rarity);
     slot.addEventListener('click', ()=> renderDetail(f));
     grid.appendChild(slot);
@@ -1357,6 +1297,7 @@ function handleBossAnswer(idx, f){
     feedback.className = 'feedback good';
     pie.classList.add('hit');
     sfxCorrect();
+    Rarity.record(f.id, true, false);
     bb.correctCount++;
   } else {
     opts[idx].classList.add('wrong');
@@ -1364,6 +1305,7 @@ function handleBossAnswer(idx, f){
     feedback.innerHTML = `The correct answer was ${formatFractionText(f.options[f.correct])}`;
     feedback.className = 'feedback bad';
     sfxWrong();
+    Rarity.record(f.id, false, false);
     bb.missed.push(f);
   }
   setTimeout(()=>{

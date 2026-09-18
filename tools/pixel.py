@@ -106,9 +106,20 @@ def dither(c, x, y, w, h, key, density, seed, pattern="scatter"):
                 c.set(xx, yy, key)
 
 
-def save(canvas, path, scale=1):
+def save(canvas, path, scale=1, indexed=False):
+    """
+    Write a PNG. `indexed=True` quantises to a palette, which is lossless for
+    pixel art (few distinct colours) and roughly halves the file — worth it on
+    the big sheets, pointless on the small ones.
+    """
     img = canvas.to_image()
     if scale != 1:
         img = img.resize((img.width * scale, img.height * scale), Image.NEAREST)
-    img.save(path)
+    if indexed:
+        n = len(set(img.getdata()))
+        if n <= 256:
+            # FASTOCTREE is the only RGBA-capable method that keeps the alpha
+            # channel, and with <=256 distinct colours it is exact, not lossy.
+            img = img.quantize(colors=n, method=Image.FASTOCTREE)
+    img.save(path, optimize=True)
     return path

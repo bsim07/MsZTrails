@@ -1,0 +1,227 @@
+[
+ {
+  "id": 0,
+  "name": "Halvo",
+  "tag": "Shading Type",
+  "num": 1,
+  "den": 2,
+  "color": "#4EC1A5",
+  "ear": "#2E9C81"
+ },
+ {
+  "id": 1,
+  "name": "Triqua",
+  "tag": "Shading Type",
+  "num": 1,
+  "den": 3,
+  "color": "#F2A65A",
+  "ear": "#D6863A"
+ },
+ {
+  "id": 2,
+  "name": "Quadrin",
+  "tag": "Compare Type",
+  "num": 4,
+  "den": 5,
+  "color": "#8E7CE0",
+  "ear": "#6B54C4"
+ },
+ {
+  "id": 3,
+  "name": "Ordelle",
+  "tag": "Ordering Type",
+  "num": 5,
+  "den": 6,
+  "color": "#4E9FDA",
+  "ear": "#3576A8"
+ },
+ {
+  "id": 4,
+  "name": "Addix",
+  "tag": "Addition Type",
+  "num": 5,
+  "den": 7,
+  "color": "#FF9F5A",
+  "ear": "#DD7B33"
+ },
+ {
+  "id": 5,
+  "name": "Subtra",
+  "tag": "Subtraction Type",
+  "num": 4,
+  "den": 9,
+  "color": "#E0637A",
+  "ear": "#B84156"
+ },
+ {
+  "id": 6,
+  "name": "Wordlet",
+  "tag": "Word Problem",
+  "num": 5,
+  "den": 8,
+  "color": "#E07CC2",
+  "ear": "#B95498"
+ },
+ {
+  "id": 7,
+  "name": "Setto",
+  "tag": "Fraction of a Set",
+  "num": 1,
+  "den": 4,
+  "color": "#E8C94E",
+  "ear": "#C7A82E"
+ },
+ {
+  "id": 8,
+  "name": "Nearone",
+  "tag": "Near-A-Whole Type",
+  "num": 4,
+  "den": 5,
+  "color": "#63C97D",
+  "ear": "#3FA25B"
+ },
+ {
+  "id": 9,
+  "name": "Partly",
+  "tag": "Vocabulary Type",
+  "num": 3,
+  "den": 7,
+  "color": "#A9825A",
+  "ear": "#8A6742"
+ },
+ {
+  "id": 10,
+  "name": "Halfmark",
+  "tag": "Benchmark Type",
+  "num": 3,
+  "den": 8,
+  "color": "#5CBEDB",
+  "ear": "#3A96B3"
+ },
+ {
+  "id": 11,
+  "name": "Groupzy",
+  "tag": "Fraction of a Set",
+  "num": 1,
+  "den": 5,
+  "color": "#E8A13F",
+  "ear": "#C77F22"
+ },
+ {
+  "id": 12,
+  "name": "Subtrix",
+  "tag": "Subtraction Type",
+  "num": 3,
+  "den": 11,
+  "color": "#C25B7A",
+  "ear": "#9E3E5C"
+ },
+ {
+  "id": 13,
+  "name": "Addelle",
+  "tag": "Word Problem",
+  "num": 3,
+  "den": 6,
+  "color": "#7FBF6B",
+  "ear": "#569943"
+ },
+ {
+  "id": 14,
+  "name": "Lineup",
+  "tag": "Ordering Type",
+  "num": 7,
+  "den": 8,
+  "color": "#9C7FE0",
+  "ear": "#7857BE"
+ },
+ {
+  "id": 15,
+  "name": "Wholesome",
+  "tag": "Vocabulary Type",
+  "num": 4,
+  "den": 4,
+  "color": "#4EA695",
+  "ear": "#33796C"
+ },
+ {
+  "id": 16,
+  "name": "Sumora",
+  "tag": "Addition Type",
+  "num": 7,
+  "den": 9,
+  "color": "#6FA8DC",
+  "ear": "#4C82B8"
+ },
+ {
+  "id": 17,
+  "name": "Plusix",
+  "tag": "Addition Type",
+  "num": 3,
+  "den": 5,
+  "color": "#E8955C",
+  "ear": "#C97538"
+ },
+ {
+  "id": 18,
+  "name": "Combino",
+  "tag": "Addition Type",
+  "num": 7,
+  "den": 10,
+  "color": "#7ED9A6",
+  "ear": "#4FAE7C"
+ },
+ {
+  "id": 19,
+  "name": "Minuso",
+  "tag": "Subtraction Type",
+  "num": 5,
+  "den": 10,
+  "color": "#D97BA6",
+  "ear": "#B2547F"
+ },
+ {
+  "id": 20,
+  "name": "Takeway",
+  "tag": "Subtraction Type",
+  "num": 4,
+  "den": 8,
+  "color": "#A87BD9",
+  "ear": "#8154B2"
+ },
+ {
+  "id": 21,
+  "name": "Storyfrac",
+  "tag": "Word Problem",
+  "num": 3,
+  "den": 4,
+  "color": "#6BC7C1",
+  "ear": "#489B95"
+ },
+ {
+  "id": 22,
+  "name": "Talebit",
+  "tag": "Word Problem",
+  "num": 3,
+  "den": 10,
+  "color": "#E0B15C",
+  "ear": "#B98A36"
+ },
+ {
+  "id": 23,
+  "name": "Sharemint",
+  "tag": "Fraction of a Set",
+  "num": 1,
+  "den": 3,
+  "color": "#7C9BE0",
+  "ear": "#5A78BE"
+ },
+ {
+  "id": 24,
+  "name": "Piecewise",
+  "tag": "Fraction of a Set",
+  "num": 1,
+  "den": 6,
+  "color": "#D9A05C",
+  "ear": "#B37D3A"
+ }
+]

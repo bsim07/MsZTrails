@@ -98,6 +98,68 @@ const check = (name, pass, detail = '') =>
     .getPropertyValue('--px').trim());
   check('--px scales up on a wider viewport', +px2 > +px, `${px} -> ${px2}`);
 
+  // --- Fractlings (skipped cleanly if the Fractling handoff isn't applied yet)
+  var hasFractlings = await page.evaluate(() => !!window.Rarity);
+  if (hasFractlings) {
+    // Exactly one Legendary per session, at any session size.
+    check('exactly one Legendary per session',
+      await page.evaluate(() => {
+        for (var n = 4; n <= 20; n++) {
+          var ids = Array.from({ length: n }, (_, i) => i);
+          var m = Rarity.assign(ids, { seed: n });
+          var leg = Object.values(m).filter(r => r === 'legendary').length;
+          if (leg !== 1) return false;
+        }
+        return true;
+      }));
+
+    // Evidence moves a Fractling up the tiers. This is the whole feature.
+    check('a repeatedly-missed Fractling becomes the Legendary',
+      await page.evaluate(() => {
+        Rarity.reset();
+        var ids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        for (var i = 0; i < 8; i++) Rarity.record(5, false, false);
+        for (var j = 0; j < 8; j++) { ids.forEach(id => { if (id !== 5) Rarity.record(id, true, false); }); }
+        return Rarity.assign(ids, { seed: 1 })[5] === 'legendary';
+      }));
+
+    // With a graded spread of evidence the tiers must follow difficulty order.
+    // (Where several questions tie — a fresh install, say — the spread among
+    // them is random by design, so this seeds a clear gradient instead.)
+    check('tiers follow difficulty order',
+      await page.evaluate(() => {
+        Rarity.reset();
+        var ids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        ids.forEach(function (id, i) {              // id 9 hardest, id 0 easiest
+          for (var k = 0; k < 10; k++) Rarity.record(id, k >= i, false);
+        });
+        var rank = { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4 };
+        var m = Rarity.assign(ids, { seed: 2 });
+        for (var i = 1; i < ids.length; i++) {
+          if (rank[m[ids[i]]] < rank[m[ids[i - 1]]]) return false;
+        }
+        return m[9] === 'legendary' && m[0] === 'common';
+      }));
+
+    check('difficulty is damped until a question has been seen enough',
+      await page.evaluate(() => {
+        Rarity.reset();
+        Rarity.record(3, false, false);            // one wrong answer only
+        return Rarity.difficulty(3) < 0.62;        // not yet trusted at 1.0
+      }));
+
+    check('rarity survives blocked localStorage',
+      await page.evaluate(() => {
+        var real = localStorage.setItem;
+        localStorage.setItem = function () { throw new Error('blocked'); };
+        var ok = false;
+        try { Rarity.record(1, false, false); ok = !!Rarity.assign([1, 2, 3]); }
+        finally { localStorage.setItem = real; }
+        return ok;
+      }));
+    await page.evaluate(() => Rarity.reset());
+  }
+
   check('no runtime errors', errors.length === 0, errors.slice(0, 3).join(' | '));
 
   // --- reduced motion

@@ -18,6 +18,9 @@ const ASSETS = [
   './assets/alert.png',
   './assets/clouds.png',
   './assets/treeline.png'
+  ,'./assets/fractlings.png'
+  ,'./assets/fractlings.css'
+  ,'./assets/rarity.js'
 ];
 
 self.addEventListener('install', (event) => {
