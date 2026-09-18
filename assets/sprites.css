@@ -124,8 +124,15 @@
    them. A per-tile delay is set inline in JS so the field ripples instead of
    flapping in unison. */
 .t-grass              { --cx: 4; --cy: 0; animation: sway 1.6s steps(1, end) infinite; }
-.t-grass.caught       { --cx: 6; --cy: 0; animation: none; }
-.t-grass.checked-empty{ --cx: 7; --cy: 0; animation: none; }
+.t-grass.caught,
+.t-grass.checked-empty{
+  background-image: url("tiles.png");
+  background-repeat: no-repeat;
+  background-size: calc(128px * var(--px)) calc(80px * var(--px));
+  animation: none;
+}
+.t-grass.caught       { --cx: 6; --cy: 0; }
+.t-grass.checked-empty{ --cx: 7; --cy: 0; }
 
 @keyframes sway {
   0%   { background-position-x: calc(4 * -16px * var(--px)); }
