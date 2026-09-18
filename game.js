@@ -1502,7 +1502,35 @@ async function renderTeacherPage(){
   document.getElementById('importCodeInput').addEventListener('keydown', (e)=>{
     if(e.key === 'Enter'){ e.preventDefault(); importClassCode(); }
   });
+
+  const urlCode = new URLSearchParams(window.location.search).get('code');
+  if(urlCode){
+    const result = saveClassCode(urlCode);
+    const cleanUrl = window.location.pathname + '?teacher=dashboard';
+    window.history.replaceState({}, '', cleanUrl);
+    if(result.ok) toast(result.name + "'s results were added!");
+    else toast(result.error);
+  }
+
   await loadDashboardData();
+}
+
+function saveClassCode(code){
+  let payload;
+  try{
+    payload = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+  }catch(e){
+    return {ok:false, error:"That code couldn't be read — make sure it was copied in full."};
+  }
+  if(!payload || typeof payload !== 'object' || !payload.name){
+    return {ok:false, error:"That code doesn't look like a valid Class Code."};
+  }
+  try{
+    localStorage.setItem('ft_response:import_' + slugify(payload.name), JSON.stringify(payload));
+  }catch(e){
+    return {ok:false, error:'Could not save that student — storage may be full.'};
+  }
+  return {ok:true, name:payload.name};
 }
 
 function importClassCode(){
@@ -1510,25 +1538,10 @@ function importClassCode(){
   if(!input) return;
   const code = input.value.trim();
   if(!code){ toast('Paste a Class Code first.'); return; }
-  let payload;
-  try{
-    payload = JSON.parse(decodeURIComponent(escape(atob(code))));
-  }catch(e){
-    toast("That code couldn't be read — make sure it was copied in full.");
-    return;
-  }
-  if(!payload || typeof payload !== 'object' || !payload.name){
-    toast("That code doesn't look like a valid Class Code.");
-    return;
-  }
-  try{
-    localStorage.setItem('ft_response:import_' + slugify(payload.name), JSON.stringify(payload));
-  }catch(e){
-    toast('Could not save that student — storage may be full.');
-    return;
-  }
+  const result = saveClassCode(code);
+  if(!result.ok){ toast(result.error); return; }
   input.value = '';
-  toast(payload.name + "'s results were added!");
+  toast(result.name + "'s results were added!");
   loadDashboardData();
 }
 
@@ -1720,9 +1733,26 @@ function downloadResultsText(text){
   }
 }
 
+function buildResultsQrUrl(code){
+  return window.location.origin + window.location.pathname + '?teacher=dashboard&code=' + encodeURIComponent(code);
+}
+
+function buildResultsQrSvg(code){
+  if(typeof qrcode === 'undefined') return '';
+  try{
+    const qr = qrcode(0, 'M');
+    qr.addData(buildResultsQrUrl(code));
+    qr.make();
+    return qr.createSvgTag({cellSize:4, margin:8});
+  }catch(e){
+    return '';
+  }
+}
+
 function renderExportModal(){
   const text = buildResultsText();
   const code = buildResultsCode();
+  const qrSvg = buildResultsQrSvg(code);
   const overlay = openModal(`
     <button class="modal-close" data-close>×</button>
     <div class="journal-head" style="background:linear-gradient(180deg,#63C97D,#3FA25B);">
@@ -1737,6 +1767,11 @@ function renderExportModal(){
       <button class="btn-secondary" id="copyResultsBtn">📋 Copy</button>
       <button class="btn-primary" id="downloadResultsBtn">⬇️ Download .txt</button>
     </div>
+    ${qrSvg ? `
+    <div style="padding:4px 20px 4px;text-align:center;">
+      <p style="margin:6px 0;font-size:13px;color:#4E6B84;">📷 Ask your teacher to scan this with their phone camera — it opens the Teacher Dashboard with your results already added!</p>
+      <div style="display:inline-block;background:#fff;border-radius:10px;padding:6px;" class="export-qr">${qrSvg}</div>
+    </div>` : ''}
     <div style="padding:4px 20px 14px;">
       <p style="margin:6px 0;font-size:13px;color:#4E6B84;">Or if your teacher has the <b>Teacher Dashboard</b> open, copy this <b>Class Code</b> and paste it into the "Add student" box there:</p>
       <textarea id="exportCode" readonly style="width:100%;height:70px;font-family:monospace;font-size:12px;

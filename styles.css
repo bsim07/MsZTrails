@@ -599,6 +599,7 @@
   }
   .journal-head h3{margin:0;font-size:1.15em;}
   .journal-head p{margin:4px 0 0;font-size:0.8em;font-weight:700;opacity:0.9;}
+  .export-qr svg{max-width:180px;width:100%;height:auto;display:block;}
   .journal-grid{
     display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:18px 20px;
   }
