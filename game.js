@@ -5,6 +5,7 @@ const state = {
   pos:{...START},
   caught:{},           // fractlingId -> true
   records:{},          // fractlingId -> {yourAnswer, correctAnswer, strategy, confidence, attempts, neededHint}
+  classStats:{},       // fractlingId -> {correct, wrong, students}
   battle:null,         // {id, wrongCount}
   slotAssignment:{},   // slotIndex -> fractlingId or null (decoy)
   sessionFractlingIds:[], // this LEVEL's 10 target Fractlings
@@ -35,13 +36,13 @@ function assignSlots(mode){
   if(state.level <= 1){
     const allIds = FRACTLINGS.map(f=>f.id);
     if(state.focusTags.length===0){
-      targetIds = shuffleArray([...allIds]).slice(0,10);
+      targetIds = chooseRarityWeighted(allIds, 10);
     } else {
       // Strict filter: a chosen focus should ONLY show that category's questions,
       // never padded out with unrelated ones — a shorter, genuinely-focused round
       // is better than a diluted one.
       const matched = shuffleArray(allIds.filter(id => state.focusTags.includes(FRACTLINGS.find(f=>f.id===id).tag)));
-      targetIds = matched.slice(0,10);
+      targetIds = chooseRarityWeighted(matched, 10);
     }
     state.level1TargetIds = targetIds;
   } else {
@@ -69,6 +70,57 @@ function assignSlots(mode){
   state.slotAssignment = {};
   allSlots.forEach(s => state.slotAssignment[s] = null);
   filled.forEach((slotIdx, i) => { state.slotAssignment[slotIdx] = order[i]; });
+}
+
+function readClassStats(){
+  try{ return JSON.parse(localStorage.getItem('ft_class_stats_v1') || '{}'); }
+  catch(e){ return {}; }
+}
+
+function rarityScore(id){
+  const stats = readClassStats()[id] || {};
+  const total = (stats.correct||0) + (stats.wrong||0);
+  if(!total) return 0;
+  return (stats.wrong||0) / total;
+}
+
+function getFractlingRarity(id){
+  const score = rarityScore(id);
+  const base = id === 24 ? 'legendary' : (id === 20 || id === 21 ? 'rare' : (id % 5 === 0 ? 'uncommon' : 'common'));
+  const baseInfo = {
+    common:{label:'Common',weight:2.4},
+    uncommon:{label:'Uncommon',weight:1.2},
+    rare:{label:'Rare',weight:.65},
+    legendary:{label:'Legendary',weight:.25}
+  }[base];
+  if(score >= .7) return {key:'legendary', label:'Legendary', weight:.25};
+  if(score >= .5) return {key:'rare', label:'Rare', weight:.65};
+  if(score >= .3) return {key:'uncommon', label:'Uncommon', weight:1.2};
+  return {key:base, label:baseInfo.label, weight:baseInfo.weight};
+}
+
+function chooseRarityWeighted(ids, count){
+  const pool = [...ids];
+  const chosen = [];
+  while(pool.length && chosen.length < count){
+    const weights = pool.map(id=>getFractlingRarity(id).weight);
+    const total = weights.reduce((sum, weight)=>sum+weight, 0);
+    let pick = Math.random() * total;
+    let index = 0;
+    for(; index<pool.length-1; index++){
+      pick -= weights[index];
+      if(pick <= 0) break;
+    }
+    chosen.push(pool.splice(index, 1)[0]);
+  }
+  return chosen;
+}
+
+function recordClassOutcome(id, correct){
+  const stats = readClassStats();
+  stats[id] = stats[id] || {correct:0, wrong:0, students:0};
+  stats[id][correct ? 'correct' : 'wrong']++;
+  try{ localStorage.setItem('ft_class_stats_v1', JSON.stringify(stats)); }catch(e){}
 }
 function slotForFractling(fid){
   return Object.keys(state.slotAssignment).find(k => String(state.slotAssignment[k]) === String(fid));
@@ -585,9 +637,25 @@ document.getElementById('dpad').querySelectorAll('button').forEach(b=>{
 const modalRoot = document.getElementById('modalRoot');
 function openModal(html){
   modalRoot.innerHTML = `<div class="modal-overlay" id="curOverlay"><div class="modal-card">${html}</div></div>`;
-  return document.getElementById('curOverlay');
+  const overlay = document.getElementById('curOverlay');
+  overlay.addEventListener('click', (event)=>{
+    if(event.target === overlay) closeModal();
+  });
+  return overlay;
 }
 function closeModal(){ modalRoot.innerHTML=''; }
+
+modalRoot.addEventListener('click', (event)=>{
+  const closeButton = event.target.closest('[data-close]');
+  if(closeButton){
+    event.preventDefault();
+    event.stopPropagation();
+    closeModal();
+  }
+});
+document.addEventListener('keydown', (event)=>{
+  if(event.key === 'Escape' && document.getElementById('curOverlay')) closeModal();
+});
 
 /* ================= GUIDE DIALOG ================= */
 function openGuideDialog(key){
@@ -623,6 +691,7 @@ function renderBattleFight(f){
     <div class="creature-stage" id="creatureStage">
       <div class="creature-name">${f.name}</div>
       <div class="creature-tag">${f.tag}</div>
+      <div class="rarity-badge rarity-${getFractlingRarity(f.id).key}">${getFractlingRarity(f.id).label} Fractling</div>
       <div class="hp-wrap"><div class="hp-bar" id="hpBar"></div></div>
     </div>
     <div class="battle-body">
@@ -675,7 +744,9 @@ function handleAnswer(idx, f){
     state.records[f.id].correctAnswer = f.options[f.correct];
     state.records[f.id].question = f.question;
     state.records[f.id].attempts = (state.battle.wrongCount||0) + 1;
+    state.records[f.id].wrongAttempts = state.battle.wrongCount||0;
     state.records[f.id].neededHint = usedHint;
+    recordClassOutcome(f.id, true);
     if(state.battle.wrongCount===0){
       state.streak++;
       state.bestStreak = Math.max(state.bestStreak, state.streak);
@@ -690,6 +761,9 @@ function handleAnswer(idx, f){
     feedback.className = 'feedback bad';
     pie.classList.remove('hit'); void pie.offsetWidth; pie.classList.add('hit');
     sfxWrong();
+    state.records[f.id] = state.records[f.id] || {question:f.question};
+    state.records[f.id].wrongAttempts = (state.records[f.id].wrongAttempts||0) + 1;
+    recordClassOutcome(f.id, false);
     state.battle.wrongCount++;
     state.streak = 0;
     updateStreakUI();
@@ -976,7 +1050,7 @@ function renderJournal(){
     <button class="modal-close" data-close>×</button>
     <div class="journal-head">
       <h3>📖 Fractling Journal</h3>
-      <p>Tap a Fractling to revisit the question &amp; your reflection</p>
+      <p>${caughtIds.length} caught · Tap a Fractling to revisit your reflection</p>
     </div>
     <div class="journal-grid" id="journalGrid"></div>
     ${caughtIds.length===0 ? '<div class="dash-empty">You haven\'t caught any Fractlings yet — explore the tall grass!</div>' : ''}
@@ -994,6 +1068,10 @@ function renderJournal(){
     nm.className = 'slot-name';
     nm.textContent = f.name;
     slot.appendChild(nm);
+    const rarity = document.createElement('div');
+    rarity.className = 'rarity-badge rarity-' + getFractlingRarity(f.id).key;
+    rarity.textContent = getFractlingRarity(f.id).label;
+    slot.appendChild(rarity);
     slot.addEventListener('click', ()=> renderDetail(f));
     grid.appendChild(slot);
   });
@@ -1318,7 +1396,6 @@ function finishBoss(){
 
 
 async function saveProgress(){
-  if(!state.storageKey || typeof window.storage === 'undefined') return;
   const payload = {
     name: state.playerName,
     updatedAt: Date.now(),
@@ -1337,12 +1414,18 @@ async function saveProgress(){
         yourAnswer: r.yourAnswer,
         correctAnswer: r.correctAnswer,
         attempts: r.attempts,
+        wrongAttempts: r.wrongAttempts||0,
+        correct: r.correctAnswer === r.yourAnswer,
         neededHint: r.neededHint,
         strategy: r.strategy,
         confidence: r.confidence
       };
     })
   };
+  if(state.storageKey){
+    try{ localStorage.setItem(state.storageKey, JSON.stringify(payload)); }catch(e){}
+  }
+  if(typeof window.storage === 'undefined') return;
   try{
     await window.storage.set(state.storageKey, JSON.stringify(payload), true);
   }catch(e){
@@ -1372,21 +1455,18 @@ async function renderDashboard(){
 async function loadDashboardData(){
   const content = document.getElementById('dashContent');
   if(!content) return;
-  if(typeof window.storage === 'undefined'){
-    content.innerHTML = `<div class="dash-empty">
-      Live syncing isn't available for this copy of the game — it only works in certain hosting setups.<br><br>
-      Instead, ask each student to tap <b>📤 My Results</b> (top bar during play, or on the finish screen) and send you
-      what it produces — by email, Google Classroom upload, or a shared drive folder. You can then skim each one, or
-      paste them into a spreadsheet together.
-    </div>`;
-    return;
-  }
   let keysRes;
-  try{
-    keysRes = await window.storage.list('ft_response:', true);
-  }catch(e){
-    content.innerHTML = `<div class="dash-empty">Couldn't load class data right now — try the 📤 My Results export instead (top bar / finish screen).</div>`;
-    return;
+  let localOnly = false;
+  if(typeof window.storage === 'undefined'){
+    localOnly = true;
+    keysRes = {keys:Object.keys(localStorage).filter(key=>key.indexOf('ft_response:')===0)};
+  } else {
+    try{
+      keysRes = await window.storage.list('ft_response:', true);
+    }catch(e){
+      content.innerHTML = `<div class="dash-empty">Couldn't load class data right now — try the 📤 My Results export instead.</div>`;
+      return;
+    }
   }
   const keys = (keysRes && keysRes.keys) || [];
   if(keys.length===0){
@@ -1396,52 +1476,76 @@ async function loadDashboardData(){
   const students = [];
   for(const k of keys){
     try{
-      const res = await window.storage.get(k, true);
-      if(res && res.value) students.push(JSON.parse(res.value));
+      if(localOnly){
+        const value = localStorage.getItem(k);
+        if(value) students.push(JSON.parse(value));
+      } else {
+        const res = await window.storage.get(k, true);
+        if(res && res.value) students.push(JSON.parse(res.value));
+      }
     }catch(e){ /* skip unreadable entry */ }
   }
   students.sort((a,b)=> b.updatedAt - a.updatedAt);
 
   const rows = students.map(s=>`
-    <tr>
+    ${(() => {
+      const records = s.records||[];
+      const correct = records.filter(r=>r.correct).length;
+      const wrong = records.reduce((sum,r)=>sum+(r.wrongAttempts||0),0);
+      return `<tr>
       <td>${s.name||'Anonymous'}</td>
       <td>${s.level===3 ? (s.bossPassed?'L3 🎓':'L3') : 'L'+(s.level||1)}</td>
+      <td>${correct}</td>
+      <td>${wrong}</td>
       <td>${s.caughtCount||0} caught</td>
       <td>${(s.trainerBadges||[]).length}/${Object.keys(TRAINERS).length}</td>
-      <td>${s.bestStreak||0}</td>
       <td>${timeAgo(s.updatedAt)}</td>
-    </tr>`).join('');
+    </tr>`;
+    })()}
+  `).join('');
 
   // Class-wide difficulty: average attempts per Fractling across students who caught it
   const diff = {};
   students.forEach(s=>{
     (s.records||[]).forEach(r=>{
-      if(!diff[r.fractling]) diff[r.fractling] = {sum:0,count:0,tag:r.tag};
-      diff[r.fractling].sum += (r.attempts||1);
-      diff[r.fractling].count++;
+      if(!diff[r.fractling]) diff[r.fractling] = {correct:0,wrong:0,tag:r.tag};
+      if(r.correct) diff[r.fractling].correct++;
+      diff[r.fractling].wrong += (r.wrongAttempts||0);
     });
   });
   const diffRows = Object.entries(diff)
-    .map(([name,d])=>({name, tag:d.tag, avg: d.sum/d.count}))
-    .sort((a,b)=> b.avg-a.avg)
+    .map(([name,d])=>({name, tag:d.tag, correct:d.correct, wrong:d.wrong}))
+    .sort((a,b)=> b.wrong-a.wrong)
     .slice(0,5);
   const diffHtml = diffRows.length ? diffRows.map(d=>`
       <div class="bar-row">
         <div class="bar-label">${d.name} (${d.tag})</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100, d.avg/3*100)}%"></div></div>
-        <div>${d.avg.toFixed(1)} tries avg</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100, d.wrong/Math.max(1,d.correct+d.wrong)*100)}%"></div></div>
+        <div>${d.correct} correct / ${d.wrong} wrong</div>
+      </div>`).join('') : '';
+  const easyRows = Object.entries(diff)
+    .map(([name,d])=>({name, tag:d.tag, correct:d.correct, wrong:d.wrong}))
+    .sort((a,b)=> b.correct-a.correct)
+    .slice(0,5);
+  const easyHtml = easyRows.length ? easyRows.map(d=>`
+      <div class="bar-row">
+        <div class="bar-label">${d.name} (${d.tag})</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100, d.correct/Math.max(1,d.correct+d.wrong)*100)}%"></div></div>
+        <div>${d.correct} correct / ${d.wrong} wrong</div>
       </div>`).join('') : '';
 
   content.innerHTML = `
     <div class="dash-wrap">
       <table class="dash-table">
-        <thead><tr><th>Student</th><th>Level</th><th>Caught</th><th>Badges</th><th>Best streak</th><th>Last active</th></tr></thead>
+        <thead><tr><th>Student</th><th>Level</th><th>Correct</th><th>Wrong</th><th>Caught</th><th>Badges</th><th>Last active</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>
-    ${diffHtml? `<div class="dash-summary">Questions needing the most tries, class-wide:</div>
+    ${diffHtml? `<div class="dash-summary">Questions most students get wrong:</div>
     <div style="padding:0 20px 4px;">${diffHtml}</div>` : ''}
-    <div class="dash-note">Data is shared across everyone using this game link — student names are self-entered and not verified.</div>
+    ${easyHtml? `<div class="dash-summary">Questions most students get correct:</div>
+    <div style="padding:0 20px 4px;">${easyHtml}</div>` : ''}
+    <div class="dash-note">${localOnly ? 'This browser is showing locally saved results. For results from multiple iPads, connect a shared storage or form endpoint.' : 'Data is shared across everyone using this game link — student names are self-entered and not verified.'}</div>
   `;
 }
 

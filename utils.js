@@ -8,7 +8,10 @@ function pieBackground(numerator, denominator, color){
 
 function makePieEl(f, size){
   const el = document.createElement('div');
-  el.className = 'pie';
+  const rarity = typeof getFractlingRarity === 'function' ? getFractlingRarity(f.id) : {key:'common',label:'Common'};
+  el.className = 'pie fractling-avatar rarity-' + rarity.key;
+  el.dataset.rarity = rarity.key;
+  el.dataset.name = f.name;
   el.style.width = size+'px';
   el.style.height = size+'px';
   el.style.backgroundImage = pieBackground(f.num, f.den, f.color);

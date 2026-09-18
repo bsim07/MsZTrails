@@ -1019,6 +1019,7 @@
     display:flex;align-items:center;justify-content:center;
     z-index:100;
     padding:16px;
+    pointer-events:auto;
   }
   .modal-card{
     background:var(--cream);
@@ -1028,6 +1029,8 @@
     overflow-y:auto;
     box-shadow:0 20px 40px rgba(0,0,0,0.35);
     position:relative;
+    z-index:1;
+    pointer-events:auto;
     animation:popIn .25s ease;
   }
   @keyframes popIn{from{transform:scale(0.85);opacity:0;}to{transform:scale(1);opacity:1;}}
@@ -1059,9 +1062,11 @@
   }
   .btn-primary{min-height:44px;}
   .btn-primary:active{transform:translateY(3px);box-shadow:none;}
-  .btn-secondary{min-height:44px;}
+  .btn-secondary{
+    min-height:44px;
     background:#fff;color:var(--leaf-dark);border:2px solid var(--leaf-dark);font-family:'Baloo 2';font-weight:700;
     padding:9px 20px;border-radius:999px;font-size:0.9em;
+    cursor:pointer;
   }
 
   /* ---------- Battle ---------- */
@@ -1083,7 +1088,7 @@
     margin:-32px auto 0;
     position:relative;
     display:flex;flex-direction:column;align-items:center;
-    z-index:2;
+    z-index:20;
   }
   .pie{
     width:110px;height:110px;border-radius:50%;
@@ -1091,7 +1096,37 @@
     box-shadow:0 8px 16px rgba(0,0,0,0.25);
     position:relative;
     animation:idle 2.6s ease-in-out infinite;
+    image-rendering:pixelated;
   }
+  .fractling-avatar{border-radius:42% 42% 50% 50%;}
+  .fractling-avatar::before,
+  .fractling-avatar::after{
+    content:"";
+    position:absolute;
+    top:28%;
+    width:24%;
+    height:28%;
+    background:var(--ear-color,#999);
+    border:3px solid rgba(42,42,42,.2);
+    z-index:-1;
+    image-rendering:pixelated;
+  }
+  .fractling-avatar::before{left:-20%;clip-path:polygon(100% 0,100% 100%,0 70%);}
+  .fractling-avatar::after{right:-20%;clip-path:polygon(0 0,100% 70%,0 100%);}
+  .rarity-badge{
+    display:inline-block;
+    margin-top:5px;
+    padding:3px 9px;
+    border-radius:999px;
+    font-size:.68em;
+    font-weight:900;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+  }
+  .rarity-common{color:#3e6b2b;background:#e4f4d7;}
+  .rarity-uncommon{color:#256b77;background:#d7f2f0;}
+  .rarity-rare{color:#684297;background:#eee0ff;}
+  .rarity-legendary{color:#8a4b00;background:#ffe0a3;box-shadow:0 0 0 2px #ffc94d;}
   @keyframes idle{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-6px) rotate(-2deg);}}
   .pie.hit{animation:hit .4s ease;}
   @keyframes hit{0%{transform:translateX(0);}20%{transform:translateX(-8px);}40%{transform:translateX(8px);}60%{transform:translateX(-6px);}80%{transform:translateX(6px);}100%{transform:translateX(0);}}
