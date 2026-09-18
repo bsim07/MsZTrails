@@ -808,11 +808,16 @@ function renderReflect(f){
   const stratList = document.getElementById('stratList');
   f.strategies.forEach((s, i)=>{
     const b = document.createElement('button');
+    b.type = 'button';
     b.className='choice-btn';
+    b.setAttribute('aria-pressed', 'false');
     b.innerHTML = formatFractionText(s);
-    b.addEventListener('click', ()=>{
+    b.addEventListener('click', (event)=>{
+      event.preventDefault();
       stratList.querySelectorAll('.choice-btn').forEach(x=>x.classList.remove('selected'));
+      stratList.querySelectorAll('.choice-btn').forEach(x=>x.setAttribute('aria-pressed', 'false'));
       b.classList.add('selected');
+      b.setAttribute('aria-pressed', 'true');
       stratIdx = i;
       checkReady();
     });
@@ -821,20 +826,31 @@ function renderReflect(f){
   const confRow = document.getElementById('confRow');
   CONFIDENCE.forEach((c,i)=>{
     const b = document.createElement('button');
+    b.type = 'button';
     b.className='conf-btn';
+    b.setAttribute('aria-pressed', 'false');
     b.textContent = c;
-    b.addEventListener('click', ()=>{
+    b.addEventListener('click', (event)=>{
+      event.preventDefault();
       confRow.querySelectorAll('.conf-btn').forEach(x=>x.classList.remove('selected'));
+      confRow.querySelectorAll('.conf-btn').forEach(x=>x.setAttribute('aria-pressed', 'false'));
       b.classList.add('selected');
+      b.setAttribute('aria-pressed', 'true');
       confIdx = i;
       checkReady();
     });
     confRow.appendChild(b);
   });
   function checkReady(){
-    document.getElementById('catchBtn').disabled = !(stratIdx!==null && confIdx!==null);
+    const catchButton = document.getElementById('catchBtn');
+    const ready = stratIdx!==null && confIdx!==null;
+    catchButton.disabled = !ready;
+    catchButton.setAttribute('aria-disabled', String(!ready));
+    catchButton.textContent = ready ? '🌀 Focus & Catch!' : 'Choose both answers';
   }
-  document.getElementById('catchBtn').addEventListener('click', ()=>{
+  document.getElementById('catchBtn').addEventListener('click', (event)=>{
+    event.preventDefault();
+    if(stratIdx===null || confIdx===null) return;
     state.records[f.id].strategy = f.strategies[stratIdx];
     state.records[f.id].strategyCatIdx = stratIdx;
     state.records[f.id].confidence = CONFIDENCE[confIdx];

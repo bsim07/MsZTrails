@@ -1192,16 +1192,17 @@
   .choice-btn{
     text-align:left;background:#fff;border:2px solid #E1EEF7;border-radius:12px;
     padding:10px 14px;font-weight:700;font-size:0.86em;color:#274A66;line-height:1.4;
+    cursor:pointer;pointer-events:auto;min-height:48px;
   }
   .choice-btn.selected{background:#DDEEFB;border-color:#4E9FDA;color:#1F3B57;}
   .conf-row{display:flex;gap:8px;padding:0 20px;margin-top:6px;}
   .conf-btn{
     flex:1;background:#fff;border:2px solid #E1EEF7;border-radius:12px;padding:10px 4px;
-    font-weight:800;font-size:0.8em;color:#274A66;
+    font-weight:800;font-size:0.8em;color:#274A66;cursor:pointer;pointer-events:auto;min-height:48px;
   }
   .conf-btn.selected{background:#FFF1CF;border-color:#FFC94D;color:#5B3A00;}
   .catch-actions{padding:16px 20px 22px;text-align:center;}
-  #catchBtn:disabled{opacity:0.4;}
+  #catchBtn:disabled{opacity:0.5;cursor:not-allowed;}
   .sparkle-layer{position:absolute;inset:0;pointer-events:none;overflow:visible;}
   .sparkle{position:absolute;font-size:1.4em;animation:sparkle 0.9s ease forwards;}
   @keyframes sparkle{

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fraction-trails-v2';
+const CACHE_NAME = 'fraction-trails-v3';
 const ASSETS = [
   './',
   './index.html',
