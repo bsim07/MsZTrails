@@ -1346,7 +1346,73 @@
   .dash-note{font-size:0.75em;color:#888;font-weight:700;padding:0 20px 14px;line-height:1.5;}
   .dash-summary{padding:14px 20px 4px;font-size:0.82em;font-weight:800;color:#274A66;}
 
+  /* ---------- Teacher landing page ---------- */
+  body.teacher-mode{
+    display:block;
+    min-height:100dvh;
+    padding:0;
+    background:linear-gradient(180deg,#D8F0E2 0%,#F7F3E8 100%);
+  }
+  body.teacher-mode #app{
+    width:100%;
+    max-width:none;
+    min-height:100dvh;
+    margin:0;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+    overflow:visible;
+    background:transparent;
+  }
+  #teacherPage{min-height:100dvh;}
+  .teacher-page-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:24px;
+    padding:clamp(28px,6vw,72px) max(24px,calc((100% - 1080px)/2));
+    color:#fff;
+    background:linear-gradient(135deg,#347A36 0%,#76B947 100%);
+  }
+  .teacher-kicker{
+    font-size:.78em;
+    font-weight:900;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    opacity:.82;
+  }
+  .teacher-page-head h1{
+    margin:4px 0;
+    font-size:clamp(2em,5vw,3.4em);
+    line-height:1;
+  }
+  .teacher-page-head p{margin:10px 0 0;font-weight:700;opacity:.9;}
+  .teacher-page-head .btn-secondary{flex-shrink:0;}
+  .teacher-page-content{
+    width:min(1080px,100%);
+    margin:0 auto;
+    padding:28px 24px 56px;
+  }
+  body.teacher-mode .dash-wrap{max-height:none;margin:0 0 24px;background:#fff;}
+  body.teacher-mode .dash-table{font-size:.9em;}
+  body.teacher-mode .dash-table th,
+  body.teacher-mode .dash-table td{padding:12px 10px;}
+  body.teacher-mode .dash-summary{padding-left:0;font-size:1em;}
+  body.teacher-mode .dash-note{padding-left:0;padding-right:0;}
+  body.teacher-mode #dashContent > .dash-empty{
+    background:#fff;
+    border-radius:14px;
+    padding:48px 24px;
+    box-shadow:0 8px 24px rgba(42,59,42,.08);
+  }
+
   @media (max-width:420px){
     .options{grid-template-columns:1fr;}
     .journal-grid{grid-template-columns:repeat(3,1fr);gap:8px;}
+  }
+  @media (max-width:680px){
+    .teacher-page-head{align-items:flex-start;flex-direction:column;}
+    .teacher-page-content{padding-left:14px;padding-right:14px;}
+    body.teacher-mode .dash-wrap{overflow-x:auto;}
+    body.teacher-mode .dash-table{min-width:760px;}
   }

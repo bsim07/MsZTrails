@@ -1486,6 +1486,28 @@ async function renderDashboard(){
   await loadDashboardData();
 }
 
+async function renderTeacherPage(){
+  document.body.classList.add('teacher-mode');
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <main id="teacherPage">
+      <header class="teacher-page-head">
+        <div>
+          <div class="teacher-kicker">Fraction Trails</div>
+          <h1>Teacher Dashboard</h1>
+          <p>Track student progress, caught Fractlings, and fraction skills.</p>
+        </div>
+        <button class="btn-secondary" id="teacherRefreshBtn" type="button">Refresh results</button>
+      </header>
+      <section class="teacher-page-content">
+        <div id="dashContent"><div class="dash-empty">Checking for class data...</div></div>
+      </section>
+    </main>
+  `;
+  document.getElementById('teacherRefreshBtn').addEventListener('click', renderTeacherPage);
+  await loadDashboardData();
+}
+
 async function loadDashboardData(){
   const content = document.getElementById('dashContent');
   if(!content) return;
@@ -1705,8 +1727,7 @@ document.getElementById('exportBtn').addEventListener('click', renderExportModal
 document.getElementById('muteBtn').addEventListener('click', toggleAudioMute);
 
   if(new URLSearchParams(window.location.search).get('teacher') === 'dashboard'){
-    document.getElementById('screen-title').classList.add('hidden');
-    renderDashboard();
+    renderTeacherPage();
   }
 }
 window.initFractionTrails = initFractionTrails;
