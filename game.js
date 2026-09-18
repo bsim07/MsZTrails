@@ -379,7 +379,7 @@ function initMap(){
     if(pos.row < 0 || pos.row >= ROWS || pos.col < 0 || pos.col >= COLS) return;
     const tile = tileEls[pos.row][pos.col];
     if(!tile) return;
-    tile.className = 'tile t-trainer';
+    tile.classList.add('t-trainer');
     tile.dataset.trainer = key;
     tile.innerHTML = '<span class="npc"></span>';
     if(state.trainerBadges[key]) tile.classList.add('beaten');

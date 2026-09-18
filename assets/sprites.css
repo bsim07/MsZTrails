@@ -280,6 +280,12 @@
 /* ===================================================================== NPCs */
 
 .t-guide, .t-trainer { position: relative; }
+.t-guide, .t-trainer {
+  background-image: url("tiles.png");
+  background-repeat: no-repeat;
+  background-size: calc(128px * var(--px)) calc(80px * var(--px));
+  background-position: calc(var(--cx) * -16px * var(--px)) calc(var(--cy) * -16px * var(--px));
+}
 .t-guide::after, .t-trainer::after { content: none !important; }
 
 .t-guide .npc, .t-trainer .npc {
