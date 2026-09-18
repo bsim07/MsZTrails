@@ -487,6 +487,7 @@ function setPlayerDirection(dx,dy){
 
 function tryMove(dx,dy){
   if(state.battle || state.trainerBattle) return; // no moving mid-battle
+  if(document.getElementById('curOverlay')) return; // no moving while any modal is open (e.g. level-complete screen)
   setPlayerDirection(dx,dy);
   const nr = state.pos.row+dy, nc = state.pos.col+dx;
   if(nr<0||nr>=ROWS||nc<0||nc>=COLS) return;
