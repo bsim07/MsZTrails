@@ -53,9 +53,9 @@
     <button id="startBtn">Start Adventure →</button>
     <div class="howto">
       🎯 Pick a focus above and <b>only</b> those question types will appear (round may be a little shorter).<br>
-      🌿 <b>Tall grass</b> hides wild Fractlings — but not every patch has one, so explore!<br>
-      🧙 <b>Trail Guides</b> share a new tip every time you visit.<br>
-      🥋 <b>Rival Trainers</b> pop up in a different spot each time — beat their harder 3-question challenge for a badge.<br>
+      <span class="instruction-icon icon-grass"></span> <b>Tall grass</b> hides wild Fractlings — but not every patch has one, so explore!<br>
+      <span class="instruction-icon icon-guide"></span> <b>Trail Guides</b> share a new tip every time you visit.<br>
+      <span class="instruction-icon icon-trainer"></span> <b>Rival Trainers</b> pop up in a different spot each time — beat their harder 3-question challenge for a badge.<br>
       ⚔️ Answer to battle — get it right to weaken them.<br>
       🌀 <b>Reflect</b> on how you solved it before you catch them.<br>
       🎉 After Level 1, <b>you choose</b> your Bonus Round: new Fractlings, a rematch of your toughest ones, or both.<br>
@@ -87,13 +87,13 @@
     </div>
     <div id="mapWrap">
       <div id="mapGrid"></div>
-      <div id="mapHint">Use the arrow keys / WASD or the buttons below to walk. Step into 🌿 to explore, or visit 🧙 / 🥋 to interact!</div>
+      <div id="mapHint">Use the arrow keys / WASD or the buttons below to walk. Step into <span class="instruction-icon icon-grass"></span> to explore, or visit <span class="instruction-icon icon-guide"></span> / <span class="instruction-icon icon-trainer"></span> to interact!</div>
       <div id="dpad">
-        <button class="up" data-dx="0" data-dy="-1">▲</button>
-        <button class="left" data-dx="-1" data-dy="0">◀</button>
+        <button class="up" data-dx="0" data-dy="-1" aria-label="Move up"><span class="nav-arrow"></span></button>
+        <button class="left" data-dx="-1" data-dy="0" aria-label="Move left"><span class="nav-arrow"></span></button>
         <div class="center"></div>
-        <button class="right" data-dx="1" data-dy="0">▶</button>
-        <button class="down" data-dx="0" data-dy="1">▼</button>
+        <button class="right" data-dx="1" data-dy="0" aria-label="Move right"><span class="nav-arrow"></span></button>
+        <button class="down" data-dx="0" data-dy="1" aria-label="Move down"><span class="nav-arrow"></span></button>
       </div>
     </div>
   </div>

@@ -986,6 +986,32 @@
     max-width:440px;
     line-height:1.5;
   }
+  .instruction-icon{
+    display:inline-block;
+    width:18px;
+    height:22px;
+    vertical-align:middle;
+    image-rendering:pixelated;
+    background-repeat:no-repeat;
+    background-size:144px 90px;
+  }
+  .icon-grass{
+    width:18px;
+    height:18px;
+    background-image:url('assets/tiles.png');
+    background-size:144px 90px;
+    background-position:-72px 0;
+  }
+  .icon-guide{
+    background-image:url('assets/chars.png');
+    background-size:144px 90px;
+    background-position:-36px -36px;
+  }
+  .icon-trainer{
+    background-image:url('assets/chars.png');
+    background-size:144px 90px;
+    background-position:-36px -72px;
+  }
 
   /* D-pad */
   #dpad{
@@ -999,12 +1025,27 @@
     background:#fff;
     border:2px solid #4C8A2E;
     border-radius:14px;
-    font-size:1.5em;
     color:#4C8A2E;
     box-shadow:0 4px 0 #cfe3c9;
     min-width:64px;
     min-height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    -webkit-user-select:none;
+    user-select:none;
   }
+  #dpad .nav-arrow{
+    display:block;
+    width:0;
+    height:0;
+    border-top:14px solid transparent;
+    border-bottom:14px solid transparent;
+  }
+  #dpad .up .nav-arrow{border-left:14px solid transparent;border-right:14px solid transparent;border-bottom:24px solid #4C8A2E;border-top:0;}
+  #dpad .down .nav-arrow{border-left:14px solid transparent;border-right:14px solid transparent;border-top:24px solid #4C8A2E;border-bottom:0;}
+  #dpad .left .nav-arrow{border-right:24px solid #4C8A2E;border-top:14px solid transparent;border-bottom:14px solid transparent;border-left:0;}
+  #dpad .right .nav-arrow{border-left:24px solid #4C8A2E;border-top:14px solid transparent;border-bottom:14px solid transparent;border-right:0;}
   #dpad button:active{transform:translateY(3px);box-shadow:none;}
   #dpad .up{grid-column:2;grid-row:1;}
   #dpad .left{grid-column:1;grid-row:2;}

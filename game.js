@@ -196,7 +196,9 @@ function createBgmOscillator(ctx, freq){
 function startBackgroundMusic(){
   if(bgmNodes || state.muted) return;
   const ctx = ensureAudio(); if(!ctx) return;
-  if(ctx.state === 'suspended') ctx.resume();
+  // iOS may reject a promise continuation as no longer being part of the tap.
+  // Resume synchronously, then build the graph immediately within the gesture.
+  if(ctx.state === 'suspended') ctx.resume().catch(()=>{});
 
   const master = ctx.createGain();
   master.gain.value = 0.55;
@@ -215,7 +217,7 @@ function startBackgroundMusic(){
   let step = 0;
   let lastMelody = null;
   function playMelodyNote(){
-    if(state.muted || !bgmNodes) return;
+    if(state.muted) return;
     if(lastMelody){ try{ lastMelody.o.stop(); }catch(e){} }
     const freq = BGM_NOTES[step % BGM_NOTES.length];
     const o = ctx.createOscillator(); o.type='triangle'; o.frequency.value=freq;
@@ -605,7 +607,11 @@ document.addEventListener('keydown', (e)=>{
   }
 });
 document.getElementById('dpad').querySelectorAll('button').forEach(b=>{
-  b.addEventListener('click', ()=> tryMove(+b.dataset.dx, +b.dataset.dy));
+  const move = (event)=>{
+    event.preventDefault();
+    tryMove(+b.dataset.dx, +b.dataset.dy);
+  };
+  b.addEventListener('pointerdown', move, {passive:false});
 });
 
 /* Swipe gestures on the map, so touch users aren't limited to the D-pad */
@@ -1657,7 +1663,7 @@ function renderExportModal(){
 
 /* ================= START / INIT ================= */
 function initFractionTrails(){
-document.getElementById('startBtn').addEventListener('click', async ()=>{
+document.getElementById('startBtn').addEventListener('click', ()=>{
   const rawName = document.getElementById('nameInput').value.trim();
   state.playerName = rawName || ('Explorer' + Math.floor(100+Math.random()*900));
   state.storageKey = 'ft_response:' + slugify(state.playerName) + '_' + Math.random().toString(36).slice(2,6);
@@ -1671,8 +1677,6 @@ document.getElementById('startBtn').addEventListener('click', async ()=>{
   updateProgress();
   updateStreakUI();
   saveProgress();
-  const ctx = ensureAudio();
-  if(ctx && ctx.state === 'suspended') await ctx.resume();
   startBackgroundMusic();
 });
 
