@@ -182,6 +182,7 @@
 /* Dead markup from the CSS-gradient era. Left explicitly disabled rather than
    deleted so an old cached styles.css can't paint over the sprites. */
 .tile::before, .tile::after { content: none !important; }
+.t-grass::before, .t-grass::after { content: none !important; display: none !important; }
 .blade-cluster, .blade, .terrain-sprite,
 .scholar-mei, .scholar-zed { display: none !important; }
 
