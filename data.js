@@ -585,11 +585,11 @@ function generateMap(){
     [8,20,'b'],[8,22,'b'],
   ].forEach(([r,c,ch])=>{ if(map[r][c]==='g') map[r][c]=ch; });
 
-  // 12. Random guide positions on walkable paths, away from the centre start.
+  // 12. Random guide positions on grass, away from the centre start.
   const guideCandidates = [];
   for(let r=2;r<rows-2;r++){
     for(let c=2;c<cols-2;c++){
-      if(map[r][c]==='.' && Math.abs(r-9)+Math.abs(c-13)>=5) guideCandidates.push([r,c]);
+      if(map[r][c]==='g' && Math.abs(r-9)+Math.abs(c-13)>=5) guideCandidates.push([r,c]);
     }
   }
   guideCandidates.sort(()=>Math.random()-0.5);

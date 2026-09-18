@@ -183,6 +183,9 @@
    deleted so an old cached styles.css can't paint over the sprites. */
 .tile::before, .tile::after { content: none !important; }
 .t-grass::before, .t-grass::after { content: none !important; display: none !important; }
+.t-grass.near::after,
+.t-grass.hint-glow::before,
+.t-grass.hint-glow::after { content: none !important; display: none !important; }
 .blade-cluster, .blade, .terrain-sprite,
 .scholar-mei, .scholar-zed { display: none !important; }
 

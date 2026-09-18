@@ -366,7 +366,7 @@ function initMap(){
         slotTileEls[slotIdx] = t;
       }
       else if(val && val[0]==='N'){
-        t.classList.add('t-guide');
+        t.classList.add('t-guide', 't-grassbg');
         t.dataset.guide = val;
         t.innerHTML = '<span class="npc"></span>';
       }
