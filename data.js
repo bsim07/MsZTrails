@@ -555,17 +555,18 @@ function generateMap(){
     for(let c=15;c<=24;c++)
       if(r%3!==0 && c%3!==0) map[r][c]='t';
 
-  // 9. Tall grass encounter slots — fixed positions
-  const slotPositions = [
-    [2,10],[2,13],[2,16],
-    [3, 9],[3,12],[3,15],
-    [5,11],[5,14],
-    [6,10],[6,13],
-    [11,10],[13,11],
-  ];
+  // 9. Tall grass encounter slots — many patches, only ten contain questions.
+  // The extra patches are decoys so students must explore the whole field.
+  const slotPositions = [];
+  for(let r=1;r<rows-1;r++){
+    for(let c=1;c<cols-1;c++){
+      if(map[r][c]==='g') slotPositions.push([r,c]);
+    }
+  }
+  slotPositions.sort(()=>Math.random()-0.5);
   let slotCount = 0;
   for(const [r,c] of slotPositions){
-    if(slotCount>=12) break;
+    if(slotCount>=32) break;
     if(map[r][c]==='g'){ map[r][c]='S'+slotCount; slotCount++; }
   }
 
@@ -584,9 +585,16 @@ function generateMap(){
     [8,20,'b'],[8,22,'b'],
   ].forEach(([r,c,ch])=>{ if(map[r][c]==='g') map[r][c]=ch; });
 
-  // 12. Guide positions
-  map[4][9]='N1';
-  map[13][5]='N2';
+  // 12. Random guide positions on walkable paths, away from the centre start.
+  const guideCandidates = [];
+  for(let r=2;r<rows-2;r++){
+    for(let c=2;c<cols-2;c++){
+      if(map[r][c]==='.' && Math.abs(r-9)+Math.abs(c-13)>=5) guideCandidates.push([r,c]);
+    }
+  }
+  guideCandidates.sort(()=>Math.random()-0.5);
+  if(guideCandidates[0]) map[guideCandidates[0][0]][guideCandidates[0][1]]='N1';
+  if(guideCandidates[1]) map[guideCandidates[1][0]][guideCandidates[1][1]]='N2';
 
   return {map, slotCount};
 }

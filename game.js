@@ -90,6 +90,18 @@ function assignTrainerPositions(){
   });
 }
 
+function chooseTrainerReward(){
+  const ids = FRACTLINGS.map(f=>f.id);
+  const rarityMap = Rarity.assign(ids, {seed:Date.now() + Math.floor(Math.random()*100000)});
+  const roll = Math.random();
+  const desired = roll < .02 ? 'legendary' : roll < .08 ? 'epic' : roll < .2 ? 'rare' : roll < .42 ? 'uncommon' : 'common';
+  const candidates = ids.filter(id=>rarityMap[id]===desired);
+  const id = (candidates.length ? candidates : ids).sort(()=>Math.random()-0.5)[0];
+  state.rarityByFractling = Object.assign({}, state.rarityByFractling, {[id]:rarityMap[id] || 'common'});
+  Rarity.setSession(state.rarityByFractling);
+  return FRACTLINGS[id];
+}
+
 /* ---- Sound effects (Web Audio, no external files) ---- */
 let audioCtx = null;
 function ensureAudio(){
@@ -978,9 +990,22 @@ function finishTrainerBattle(){
   const t = TRAINERS[tb.key];
   const total = tb.questions.length;
   const passed = tb.correctCount >= 2;
+  let reward = null;
   if(passed){
     state.trainerBadges[tb.key] = true;
     if(trainerTileEls[tb.key]) trainerTileEls[tb.key].classList.add('beaten');
+    reward = chooseTrainerReward();
+    state.caught[reward.id] = true;
+    state.records[reward.id] = state.records[reward.id] || {
+      question:`Rival trainer reward from ${t.name}`,
+      yourAnswer:'Captured',
+      correctAnswer:'Captured',
+      attempts:1,
+      neededHint:false,
+      strategy:'Won a rival trainer battle',
+      confidence:'Very sure',
+      explain:`You captured ${reward.name} by defeating ${t.name}.`
+    };
     sfxBadge();
   }
   const missedHtml = tb.missed.length ? `
@@ -998,7 +1023,7 @@ function finishTrainerBattle(){
     </div>
     <div class="end-body">
       ${passed
-        ? `<p style="font-weight:700;color:#3E5A34;">${t.name} hands you a badge. Come back anytime for more practice!</p>`
+        ? `<p style="font-weight:700;color:#3E5A34;">${t.name} hands you a badge. You have captured the ${rarityLabel(reward)} ${reward.name} Fractling!</p>`
         : `<p style="font-weight:700;color:#5B3A00;">You need 2 out of 3 correct to earn the badge. ${t.name} is happy to rematch anytime!</p>`}
       ${missedHtml}
     </div>
