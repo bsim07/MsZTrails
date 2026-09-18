@@ -641,6 +641,7 @@ document.getElementById('dpad').querySelectorAll('button').forEach(b=>{
 
 /* ================= MODAL SYSTEM ================= */
 const modalRoot = document.getElementById('modalRoot');
+let modalPointerActivation = false;
 function openModal(html){
   modalRoot.innerHTML = `<div class="modal-overlay" id="curOverlay"><div class="modal-card">${html}</div></div>`;
   const overlay = document.getElementById('curOverlay');
@@ -652,12 +653,23 @@ function openModal(html){
 function closeModal(){ modalRoot.innerHTML=''; }
 
 modalRoot.addEventListener('click', (event)=>{
+  if(modalPointerActivation){
+    modalPointerActivation = false;
+    event.preventDefault();
+    return;
+  }
   const closeButton = event.target.closest('[data-close]');
   if(closeButton){
     event.preventDefault();
     event.stopPropagation();
     closeModal();
   }
+});
+modalRoot.addEventListener('pointerup', (event)=>{
+  const button = event.target.closest('button');
+  if(!button || button.disabled) return;
+  modalPointerActivation = true;
+  button.click();
 });
 document.addEventListener('keydown', (event)=>{
   if(event.key === 'Escape' && document.getElementById('curOverlay')) closeModal();

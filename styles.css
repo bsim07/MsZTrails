@@ -1097,6 +1097,13 @@
     line-height:1;z-index:2;
     min-width:44px;min-height:44px;
     display:flex;align-items:center;justify-content:center;
+    pointer-events:auto;
+    touch-action:manipulation;
+  }
+  .modal-card button{
+    pointer-events:auto;
+    touch-action:manipulation;
+    -ms-touch-action:manipulation;
   }
 
   /* ---------- Dialog (trail guide) ---------- */
