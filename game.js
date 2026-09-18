@@ -1410,8 +1410,8 @@ function finishBoss(){
 
 
 
-async function saveProgress(){
-  const payload = {
+function buildProgressPayload(){
+  return {
     name: state.playerName,
     updatedAt: Date.now(),
     level: state.level,
@@ -1437,6 +1437,10 @@ async function saveProgress(){
       };
     })
   };
+}
+
+async function saveProgress(){
+  const payload = buildProgressPayload();
   if(state.storageKey){
     try{ localStorage.setItem(state.storageKey, JSON.stringify(payload)); }catch(e){}
   }
@@ -1484,13 +1488,48 @@ async function renderTeacherPage(){
         <button class="btn-secondary" id="teacherClearBtn" type="button">Clear data</button>
       </header>
       <section class="teacher-page-content">
+        <div class="teacher-import-row">
+          <input type="text" id="importCodeInput" placeholder="Paste a student's Class Code here (from 📤 My Results)" autocomplete="off" />
+          <button class="btn-primary" id="importCodeBtn" type="button">Add student</button>
+        </div>
         <div id="dashContent"><div class="dash-empty">Checking for class data...</div></div>
       </section>
     </main>
   `;
   document.getElementById('teacherRefreshBtn').addEventListener('click', renderTeacherPage);
   document.getElementById('teacherClearBtn').addEventListener('click', clearDashboardData);
+  document.getElementById('importCodeBtn').addEventListener('click', importClassCode);
+  document.getElementById('importCodeInput').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); importClassCode(); }
+  });
   await loadDashboardData();
+}
+
+function importClassCode(){
+  const input = document.getElementById('importCodeInput');
+  if(!input) return;
+  const code = input.value.trim();
+  if(!code){ toast('Paste a Class Code first.'); return; }
+  let payload;
+  try{
+    payload = JSON.parse(decodeURIComponent(escape(atob(code))));
+  }catch(e){
+    toast("That code couldn't be read — make sure it was copied in full.");
+    return;
+  }
+  if(!payload || typeof payload !== 'object' || !payload.name){
+    toast("That code doesn't look like a valid Class Code.");
+    return;
+  }
+  try{
+    localStorage.setItem('ft_response:import_' + slugify(payload.name), JSON.stringify(payload));
+  }catch(e){
+    toast('Could not save that student — storage may be full.');
+    return;
+  }
+  input.value = '';
+  toast(payload.name + "'s results were added!");
+  loadDashboardData();
 }
 
 async function loadDashboardData(){
@@ -1511,7 +1550,7 @@ async function loadDashboardData(){
   }
   const keys = (keysRes && keysRes.keys) || [];
   if(keys.length===0){
-    content.innerHTML = `<div class="dash-empty">No student data yet — play the game to create your first entry!</div>`;
+    content.innerHTML = `<div class="dash-empty">No student data yet — play the game on this device, or paste a student's Class Code above.</div>`;
     return;
   }
   const students = [];
@@ -1586,7 +1625,7 @@ async function loadDashboardData(){
     <div style="padding:0 20px 4px;">${diffHtml}</div>` : ''}
     ${easyHtml? `<div class="dash-summary">Questions most students get correct:</div>
     <div style="padding:0 20px 4px;">${easyHtml}</div>` : ''}
-    <div class="dash-note">${localOnly ? 'This browser is showing locally saved results. For results from multiple iPads, connect a shared storage or form endpoint.' : 'Data is shared across everyone using this game link — student names are self-entered and not verified.'}</div>
+    <div class="dash-note">${localOnly ? 'This shows results saved on this device, plus any Class Codes you\'ve pasted in above. Ask students on other devices to open 📤 My Results and share their Class Code with you.' : 'Data is shared across everyone using this game link — student names are self-entered and not verified.'}</div>
   `;
 }
 
@@ -1644,6 +1683,12 @@ function buildResultsText(){
   return lines.join('\n');
 }
 
+function buildResultsCode(){
+  try{
+    return btoa(unescape(encodeURIComponent(JSON.stringify(buildProgressPayload()))));
+  }catch(e){ return ''; }
+}
+
 function copyResultsText(text){
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text)
@@ -1677,6 +1722,7 @@ function downloadResultsText(text){
 
 function renderExportModal(){
   const text = buildResultsText();
+  const code = buildResultsCode();
   const overlay = openModal(`
     <button class="modal-close" data-close>×</button>
     <div class="journal-head" style="background:linear-gradient(180deg,#63C97D,#3FA25B);">
@@ -1691,10 +1737,17 @@ function renderExportModal(){
       <button class="btn-secondary" id="copyResultsBtn">📋 Copy</button>
       <button class="btn-primary" id="downloadResultsBtn">⬇️ Download .txt</button>
     </div>
+    <div style="padding:4px 20px 14px;">
+      <p style="margin:6px 0;font-size:13px;color:#4E6B84;">Or if your teacher has the <b>Teacher Dashboard</b> open, copy this <b>Class Code</b> and paste it into the "Add student" box there:</p>
+      <textarea id="exportCode" readonly style="width:100%;height:70px;font-family:monospace;font-size:12px;
+        border:2px solid #E1EEF7;border-radius:10px;padding:8px;resize:vertical;color:#7A8C99;">${escapeHtml(code)}</textarea>
+      <button class="btn-secondary" id="copyCodeBtn" style="margin-top:8px;">📋 Copy Class Code</button>
+    </div>
   `);
   overlay.querySelector('[data-close]').addEventListener('click', closeModal);
   document.getElementById('copyResultsBtn').addEventListener('click', ()=> copyResultsText(text));
   document.getElementById('downloadResultsBtn').addEventListener('click', ()=> downloadResultsText(text));
+  document.getElementById('copyCodeBtn').addEventListener('click', ()=> copyResultsText(code));
 }
 
 /* ================= START / INIT ================= */

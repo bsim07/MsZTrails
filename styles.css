@@ -722,6 +722,22 @@
     padding:48px 24px;
     box-shadow:0 8px 24px rgba(42,59,42,.08);
   }
+  .teacher-import-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+  .teacher-import-row input{
+    flex:1 1 320px;
+    min-width:0;
+    padding:11px 14px;
+    border:2px solid #D7E6D9;
+    border-radius:10px;
+    font-size:.95em;
+    font-family:inherit;
+  }
+  .teacher-import-row .btn-primary{flex-shrink:0;}
 
   @media (max-width:420px){
     .options{grid-template-columns:1fr;}
