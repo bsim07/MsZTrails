@@ -294,16 +294,9 @@ function pathEdges(r, c){
   return ok.includes(s) ? 'edge-' + s : '';
 }
 
-function setPixelScale(){
-  const wrap = document.getElementById('mapWrap');
-  if(!wrap) return;
-  const avail = wrap.clientWidth - 28;
-  const byWidth  = Math.floor(avail / (TILE * VIEWPORT_COLS));
-  const byHeight = Math.floor((window.innerHeight * 0.46) / (TILE * VIEWPORT_ROWS));
-  const px = Math.max(2, Math.min(6, byWidth, byHeight));
-  document.documentElement.style.setProperty('--px', px);
-}
-window.addEventListener('resize', ()=>{ setPixelScale(); positionPlayer(); updateCamera(); });
+/* --px is owned by assets/pixel-scale.js, which knows about both the title
+   screen and the map. Keep the map in step after it changes. */
+window.addEventListener('resize', ()=>{ positionPlayer(); updateCamera(); });
 
 function showEncounterAlert(){
   const player = document.getElementById('player');
