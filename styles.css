@@ -1002,7 +1002,8 @@
     vertical-align:middle;
     image-rendering:pixelated;
     background-repeat:no-repeat;
-    background-size:144px 90px;
+    position:relative;
+    margin-right:3px;
   }
   .icon-grass{
     width:18px;
@@ -1010,6 +1011,11 @@
     background-image:url('assets/tiles.png');
     background-size:144px 90px;
     background-position:-72px 0;
+  }
+  .icon-explorer{
+    background-image:url('assets/chars.png');
+    background-size:144px 90px;
+    background-position:0 0;
   }
   .icon-guide{
     background-image:url('assets/chars.png');
@@ -1020,6 +1026,42 @@
     background-image:url('assets/chars.png');
     background-size:144px 90px;
     background-position:-36px -72px;
+  }
+  .icon-target{
+    width:18px;height:18px;
+    border:3px solid #FF5B4D;
+    border-radius:50%;
+    box-shadow:inset 0 0 0 3px #FFD34D;
+  }
+  .icon-target::after{
+    content:"";position:absolute;left:4px;top:4px;width:4px;height:4px;
+    background:#4E9FDA;border:2px solid #fff;
+  }
+  .icon-battle::before,.icon-battle::after{
+    content:"";position:absolute;left:8px;top:0;width:4px;height:22px;
+    background:#6E4B32;border:2px solid #F2D36B;transform:rotate(45deg);
+  }
+  .icon-battle::after{transform:rotate(-45deg);background:#DDE7F3;}
+  .icon-reflect{
+    width:18px;height:18px;border:3px solid #9B65D3;border-radius:50%;
+    box-shadow:inset 0 0 0 3px #DABEFF;
+  }
+  .icon-reflect::after{content:"";position:absolute;right:-3px;bottom:-3px;width:6px;height:6px;background:#FFC94D;}
+  .icon-bonus{
+    background-image:url('assets/fx.png');
+    background-size:90px 18px;
+    background-position:0 0;
+    width:18px;height:18px;
+  }
+  .icon-journal{
+    width:18px;height:16px;margin-top:2px;
+    background:#F4F0D4;border:2px solid #7797D5;
+    box-shadow:inset 4px 0 #D4DCF4, inset -4px 0 #D4DCF4;
+  }
+  .icon-results{
+    width:16px;height:19px;margin-top:1px;
+    background:#F4F0D4;border:2px solid #4E9FDA;
+    box-shadow:inset 0 4px #FF6F59;
   }
 
   /* D-pad */
