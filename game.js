@@ -1460,10 +1460,12 @@ async function renderDashboard(){
     <div id="dashContent"><div class="dash-empty">Checking for class data…</div></div>
     <div class="detail-foot">
       <button class="btn-secondary" id="dashRefreshBtn">🔄 Refresh</button>
+      <button class="btn-secondary" id="dashClearBtn">🗑️ Clear Data</button>
     </div>
   `);
   overlay.querySelector('[data-close]').addEventListener('click', closeModal);
   document.getElementById('dashRefreshBtn').addEventListener('click', renderDashboard);
+  document.getElementById('dashClearBtn').addEventListener('click', clearDashboardData);
   await loadDashboardData();
 }
 
@@ -1479,6 +1481,7 @@ async function renderTeacherPage(){
           <p>Track student progress, caught Fractlings, and fraction skills.</p>
         </div>
         <button class="btn-secondary" id="teacherRefreshBtn" type="button">Refresh results</button>
+        <button class="btn-secondary" id="teacherClearBtn" type="button">Clear data</button>
       </header>
       <section class="teacher-page-content">
         <div id="dashContent"><div class="dash-empty">Checking for class data...</div></div>
@@ -1486,6 +1489,7 @@ async function renderTeacherPage(){
     </main>
   `;
   document.getElementById('teacherRefreshBtn').addEventListener('click', renderTeacherPage);
+  document.getElementById('teacherClearBtn').addEventListener('click', clearDashboardData);
   await loadDashboardData();
 }
 
@@ -1584,6 +1588,23 @@ async function loadDashboardData(){
     <div style="padding:0 20px 4px;">${easyHtml}</div>` : ''}
     <div class="dash-note">${localOnly ? 'This browser is showing locally saved results. For results from multiple iPads, connect a shared storage or form endpoint.' : 'Data is shared across everyone using this game link — student names are self-entered and not verified.'}</div>
   `;
+}
+
+async function clearDashboardData(){
+  if(!confirm('Clear all saved class data? This removes every student entry and cannot be undone.')) return;
+  Object.keys(localStorage)
+    .filter(k=> k.indexOf('ft_response:')===0)
+    .forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
+  if(typeof window.storage !== 'undefined'){
+    try{
+      const keysRes = await window.storage.list('ft_response:', true);
+      const keys = (keysRes && keysRes.keys) || [];
+      if(typeof window.storage.delete === 'function'){
+        for(const k of keys){ await window.storage.delete(k, true); }
+      }
+    }catch(e){ /* shared storage may not support deletion — local copy is still cleared */ }
+  }
+  await loadDashboardData();
 }
 
 
