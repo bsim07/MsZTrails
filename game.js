@@ -90,6 +90,19 @@ function assignTrainerPositions(){
   });
 }
 
+// A beaten trainer leaves the map entirely, revealing the tile underneath.
+function removeTrainerTile(key){
+  const tile = trainerTileEls[key];
+  if(tile){
+    tile.classList.remove('t-trainer', 'beaten');
+    tile.innerHTML = '';
+    delete tile.dataset.trainer;
+  }
+  const pos = state.trainerPosByKey[key];
+  if(pos) delete state.trainerPositions[pos.row+','+pos.col];
+  delete trainerTileEls[key];
+}
+
 function chooseTrainerReward(){
   const ids = FRACTLINGS.map(f=>f.id);
   const rarityMap = Rarity.assign(ids, {seed:Date.now() + Math.floor(Math.random()*100000)});
@@ -989,11 +1002,11 @@ function finishTrainerBattle(){
   const tb = state.trainerBattle;
   const t = TRAINERS[tb.key];
   const total = tb.questions.length;
-  const passed = tb.correctCount >= 2;
+  const passed = tb.correctCount === total;
   let reward = null;
   if(passed){
     state.trainerBadges[tb.key] = true;
-    if(trainerTileEls[tb.key]) trainerTileEls[tb.key].classList.add('beaten');
+    removeTrainerTile(tb.key);
     reward = chooseTrainerReward();
     state.caught[reward.id] = true;
     state.records[reward.id] = state.records[reward.id] || {
@@ -1024,7 +1037,7 @@ function finishTrainerBattle(){
     <div class="end-body">
       ${passed
         ? `<p style="font-weight:700;color:#3E5A34;">${t.name} hands you a badge. You have captured the ${rarityLabel(reward)} ${reward.name} Fractling!</p>`
-        : `<p style="font-weight:700;color:#5B3A00;">You need 2 out of 3 correct to earn the badge. ${t.name} is happy to rematch anytime!</p>`}
+        : `<p style="font-weight:700;color:#5B3A00;">You need all 3 correct to earn the badge. ${t.name} is happy to rematch anytime!</p>`}
       ${missedHtml}
     </div>
     <div class="end-foot"><button class="btn-primary" id="trainerContinueBtn">Continue</button></div>
