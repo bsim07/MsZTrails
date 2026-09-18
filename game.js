@@ -259,10 +259,20 @@ function renderAvatarPicker(){
       wrap.querySelectorAll('.avatar-btn').forEach(x=>x.classList.remove('selected'));
       b.classList.add('selected');
       state.avatar = b.dataset.avatar;
+      applyAvatarToPlayer();
     });
   });
 }
 renderAvatarPicker();
+
+function applyAvatarToPlayer(){
+  const sprite = document.querySelector('#player .sprite');
+  const player = document.getElementById('player');
+  if(!sprite || !player) return;
+  sprite.classList.remove('avatar-boy','avatar-girl');
+  sprite.classList.add(state.avatar === 'female' ? 'avatar-girl' : 'avatar-boy');
+  player.dataset.avatar = state.avatar;
+}
 
 /* ================= iOS ADD-TO-HOME-SCREEN HINT ================= */
 function showIosInstallHint(){
@@ -366,6 +376,7 @@ function initMap(){
   const player = document.createElement('div');
   player.id = 'player';
   const avatarClass = state.avatar === 'female' ? 'avatar-girl' : 'avatar-boy';
+  player.dataset.avatar = state.avatar;
   player.innerHTML = `<span class="sprite face-down ${avatarClass}">
     <span class="avatar-body">
       <span class="avatar-hair"></span>

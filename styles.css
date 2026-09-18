@@ -873,6 +873,10 @@
     background:linear-gradient(180deg, #E74C3C 0%, #C0392B 100%);
     box-shadow:inset 0 -4px 0 rgba(0,0,0,0.12);
   }
+  .avatar-boy .avatar-hair{
+    height:24%;
+    border-radius:58% 58% 24% 24%;
+  }
   .avatar-boy .avatar-torso::after{
     content:"";
     position:absolute;
@@ -898,11 +902,13 @@
     background:#3E2723;
     border-radius:20% 20% 40% 40%;
   }
+  .avatar-girl .avatar-head{z-index:2;}
   .avatar-girl .avatar-torso{
     background:linear-gradient(180deg, #F05A9D 0%, #C2185B 100%);
     box-shadow:inset 0 -4px 0 rgba(0,0,0,0.12);
     border-radius:22% 22% 35% 35%;
   }
+  .avatar-girl .avatar-legs{width:52%;}
 
   /* Directional facing: each pose has a distinct silhouette, not just a mirror. */
   .sprite.face-down .avatar-eyes{opacity:1;}
