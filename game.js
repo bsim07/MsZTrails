@@ -1676,8 +1676,16 @@ function renderExportModal(){
 /* ================= START / INIT ================= */
 function initFractionTrails(){
 document.getElementById('startBtn').addEventListener('click', ()=>{
-  const rawName = document.getElementById('nameInput').value.trim();
-  state.playerName = rawName || ('Explorer' + Math.floor(100+Math.random()*900));
+  const nameInput = document.getElementById('nameInput');
+  const rawName = nameInput.value.trim();
+  if(!rawName){
+    nameInput.setCustomValidity('Please enter your name before starting.');
+    nameInput.reportValidity();
+    nameInput.focus();
+    return;
+  }
+  nameInput.setCustomValidity('');
+  state.playerName = rawName;
   state.storageKey = 'ft_response:' + slugify(state.playerName) + '_' + Math.random().toString(36).slice(2,6);
   document.getElementById('screen-title').classList.add('hidden');
   document.getElementById('screen-game').classList.remove('hidden');
@@ -1692,10 +1700,14 @@ document.getElementById('startBtn').addEventListener('click', ()=>{
   startBackgroundMusic();
 });
 
-document.getElementById('teacherLinkBtn').addEventListener('click', renderDashboard);
 document.getElementById('exportBtn').addEventListener('click', renderExportModal);
 
 document.getElementById('muteBtn').addEventListener('click', toggleAudioMute);
+
+  if(new URLSearchParams(window.location.search).get('teacher') === 'dashboard'){
+    document.getElementById('screen-title').classList.add('hidden');
+    renderDashboard();
+  }
 }
 window.initFractionTrails = initFractionTrails;
 
