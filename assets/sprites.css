@@ -108,6 +108,10 @@
   background-position: 0 0;
   border: none;
   box-shadow: none;
+  /* styles.css used to force preserve-3d here for a 3D map tilt that's long
+     gone. Left on its own, every tile becomes its own compositing layer and
+     GPUs seam/z-fight at tile edges — the recurring stray "line" bug. */
+  transform-style: flat;
 }
 
 /* Helper: cell (col,row) in the 8x4 tile sheet. */
