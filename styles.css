@@ -224,7 +224,6 @@
     box-shadow:0 4px 14px rgba(0,0,0,0.15) inset, 0 2px 0 #fff;
     border:3px solid #4C8A2E;
     touch-action:none;
-    perspective:900px;
     background:#78C850;
     -webkit-touch-callout:none;
     -webkit-user-select:none;
@@ -239,9 +238,9 @@
     width:260%;
     height:257%;
     transition:transform .22s ease-out;
-    transform-style:preserve-3d;
-    transform:rotateX(8deg) translateY(-1%);
-    transform-origin:center center;
+    transform-style:flat;
+    transform:none;
+    transform-origin:top left;
     background:
       repeating-linear-gradient(
         -50deg,

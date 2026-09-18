@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fraction-trails-v1';
+const CACHE_NAME = 'fraction-trails-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -8,7 +8,16 @@ const ASSETS = [
   './game.js',
   './main.js',
   './tree.svg',
-  './icon.svg'
+  './icon.svg',
+  './assets/sprites.css',
+  './assets/tiles.png',
+  './assets/chars.png',
+  './assets/avatars.png',
+  './assets/tree.png',
+  './assets/fx.png',
+  './assets/alert.png',
+  './assets/clouds.png',
+  './assets/treeline.png'
 ];
 
 self.addEventListener('install', (event) => {

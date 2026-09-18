@@ -1,0 +1,465 @@
+{
+  "tiles": {
+    "file": "tiles.png",
+    "cell": [
+      16,
+      16
+    ],
+    "cols": 8,
+    "sprites": {
+      "grass_0": [
+        0,
+        0
+      ],
+      "grass_1": [
+        16,
+        0
+      ],
+      "grass_2": [
+        32,
+        0
+      ],
+      "grass_3": [
+        48,
+        0
+      ],
+      "tall_0": [
+        64,
+        0
+      ],
+      "tall_1": [
+        80,
+        0
+      ],
+      "tall_caught": [
+        96,
+        0
+      ],
+      "tall_empty": [
+        112,
+        0
+      ],
+      "path_0": [
+        0,
+        16
+      ],
+      "path_1": [
+        16,
+        16
+      ],
+      "path_n": [
+        32,
+        16
+      ],
+      "path_s": [
+        48,
+        16
+      ],
+      "path_e": [
+        64,
+        16
+      ],
+      "path_w": [
+        80,
+        16
+      ],
+      "path_ne": [
+        96,
+        16
+      ],
+      "path_nw": [
+        112,
+        16
+      ],
+      "path_se": [
+        0,
+        32
+      ],
+      "path_sw": [
+        16,
+        32
+      ],
+      "path_ns": [
+        32,
+        32
+      ],
+      "path_ew": [
+        48,
+        32
+      ],
+      "wall_0": [
+        64,
+        32
+      ],
+      "wall_1": [
+        80,
+        32
+      ],
+      "wall_2": [
+        96,
+        32
+      ],
+      "wall_3": [
+        112,
+        32
+      ],
+      "thicket": [
+        0,
+        48
+      ],
+      "cliff": [
+        16,
+        48
+      ],
+      "water_0": [
+        32,
+        48
+      ],
+      "water_1": [
+        48,
+        48
+      ],
+      "water_2": [
+        64,
+        48
+      ],
+      "flowers_0": [
+        80,
+        48
+      ],
+      "flowers_1": [
+        96,
+        48
+      ],
+      "rock": [
+        112,
+        48
+      ],
+      "bush": [
+        0,
+        64
+      ],
+      "mushroom": [
+        16,
+        64
+      ]
+    }
+  },
+  "chars": {
+    "file": "chars.png",
+    "cell": [
+      16,
+      24
+    ],
+    "cols": 12,
+    "rows": {
+      "explorer_a": 0,
+      "explorer_b": 1,
+      "guide_mei": 2,
+      "guide_zed": 3,
+      "rival": 4
+    },
+    "frame_order": [
+      "down_0",
+      "down_1",
+      "down_2",
+      "up_0",
+      "up_1",
+      "up_2",
+      "right_0",
+      "right_1",
+      "right_2",
+      "left_0",
+      "left_1",
+      "left_2"
+    ],
+    "sprites": {
+      "explorer_a_down_0": [
+        0,
+        0
+      ],
+      "explorer_a_down_1": [
+        16,
+        0
+      ],
+      "explorer_a_down_2": [
+        32,
+        0
+      ],
+      "explorer_a_up_0": [
+        48,
+        0
+      ],
+      "explorer_a_up_1": [
+        64,
+        0
+      ],
+      "explorer_a_up_2": [
+        80,
+        0
+      ],
+      "explorer_a_right_0": [
+        96,
+        0
+      ],
+      "explorer_a_right_1": [
+        112,
+        0
+      ],
+      "explorer_a_right_2": [
+        128,
+        0
+      ],
+      "explorer_a_left_0": [
+        144,
+        0
+      ],
+      "explorer_a_left_1": [
+        160,
+        0
+      ],
+      "explorer_a_left_2": [
+        176,
+        0
+      ],
+      "explorer_b_down_0": [
+        0,
+        24
+      ],
+      "explorer_b_down_1": [
+        16,
+        24
+      ],
+      "explorer_b_down_2": [
+        32,
+        24
+      ],
+      "explorer_b_up_0": [
+        48,
+        24
+      ],
+      "explorer_b_up_1": [
+        64,
+        24
+      ],
+      "explorer_b_up_2": [
+        80,
+        24
+      ],
+      "explorer_b_right_0": [
+        96,
+        24
+      ],
+      "explorer_b_right_1": [
+        112,
+        24
+      ],
+      "explorer_b_right_2": [
+        128,
+        24
+      ],
+      "explorer_b_left_0": [
+        144,
+        24
+      ],
+      "explorer_b_left_1": [
+        160,
+        24
+      ],
+      "explorer_b_left_2": [
+        176,
+        24
+      ],
+      "guide_mei_down_0": [
+        0,
+        48
+      ],
+      "guide_mei_down_1": [
+        16,
+        48
+      ],
+      "guide_mei_down_2": [
+        32,
+        48
+      ],
+      "guide_mei_up_0": [
+        48,
+        48
+      ],
+      "guide_mei_up_1": [
+        64,
+        48
+      ],
+      "guide_mei_up_2": [
+        80,
+        48
+      ],
+      "guide_mei_right_0": [
+        96,
+        48
+      ],
+      "guide_mei_right_1": [
+        112,
+        48
+      ],
+      "guide_mei_right_2": [
+        128,
+        48
+      ],
+      "guide_mei_left_0": [
+        144,
+        48
+      ],
+      "guide_mei_left_1": [
+        160,
+        48
+      ],
+      "guide_mei_left_2": [
+        176,
+        48
+      ],
+      "guide_zed_down_0": [
+        0,
+        72
+      ],
+      "guide_zed_down_1": [
+        16,
+        72
+      ],
+      "guide_zed_down_2": [
+        32,
+        72
+      ],
+      "guide_zed_up_0": [
+        48,
+        72
+      ],
+      "guide_zed_up_1": [
+        64,
+        72
+      ],
+      "guide_zed_up_2": [
+        80,
+        72
+      ],
+      "guide_zed_right_0": [
+        96,
+        72
+      ],
+      "guide_zed_right_1": [
+        112,
+        72
+      ],
+      "guide_zed_right_2": [
+        128,
+        72
+      ],
+      "guide_zed_left_0": [
+        144,
+        72
+      ],
+      "guide_zed_left_1": [
+        160,
+        72
+      ],
+      "guide_zed_left_2": [
+        176,
+        72
+      ],
+      "rival_down_0": [
+        0,
+        96
+      ],
+      "rival_down_1": [
+        16,
+        96
+      ],
+      "rival_down_2": [
+        32,
+        96
+      ],
+      "rival_up_0": [
+        48,
+        96
+      ],
+      "rival_up_1": [
+        64,
+        96
+      ],
+      "rival_up_2": [
+        80,
+        96
+      ],
+      "rival_right_0": [
+        96,
+        96
+      ],
+      "rival_right_1": [
+        112,
+        96
+      ],
+      "rival_right_2": [
+        128,
+        96
+      ],
+      "rival_left_0": [
+        144,
+        96
+      ],
+      "rival_left_1": [
+        160,
+        96
+      ],
+      "rival_left_2": [
+        176,
+        96
+      ]
+    }
+  },
+  "avatars": {
+    "file": "avatars.png",
+    "cell": [
+      48,
+      48
+    ],
+    "sprites": {
+      "explorer_a": [
+        0,
+        0
+      ],
+      "explorer_b": [
+        48,
+        0
+      ]
+    }
+  },
+  "fx": {
+    "file": "fx.png",
+    "cell": [
+      16,
+      16
+    ],
+    "sprites": {
+      "sparkle_0": [
+        0,
+        0
+      ],
+      "sparkle_1": [
+        16,
+        0
+      ],
+      "sparkle_2": [
+        32,
+        0
+      ],
+      "puff_0": [
+        48,
+        0
+      ],
+      "puff_1": [
+        64,
+        0
+      ]
+    }
+  }
+}

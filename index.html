@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="assets/sprites.css">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.svg">
 
@@ -24,6 +25,7 @@
     <span class="badge">Primary 3 · Fractions</span>
     <h1>Fraction Trails</h1>
     <p>Walk through the tall grass, meet wild <b>Fractlings</b>, battle them with fraction questions, and reflect on your thinking to catch them!</p>
+    <div id="titleScene"></div>
     <div class="title-critters" id="titleCritters"></div>
     <input id="nameInput" type="text" placeholder="Enter your first name" maxlength="18">
     <br>
@@ -33,12 +35,12 @@
       </div>
       <div id="avatarPickerButtons" style="display:flex;justify-content:center;gap:12px;">
         <button class="avatar-btn selected" data-avatar="male" type="button">
-          <span class="avatar-emoji">🧑‍🎒</span>
-          <span class="avatar-label">Boy Explorer</span>
+          <span class="portrait"></span>
+          <span class="avatar-label">Rowan</span>
         </button>
         <button class="avatar-btn" data-avatar="female" type="button">
-          <span class="avatar-emoji">👩‍🎒</span>
-          <span class="avatar-label">Girl Explorer</span>
+          <span class="portrait"></span>
+          <span class="avatar-label">Nia</span>
         </button>
       </div>
     </div>

@@ -266,11 +266,8 @@ function renderAvatarPicker(){
 renderAvatarPicker();
 
 function applyAvatarToPlayer(){
-  const sprite = document.querySelector('#player .sprite');
   const player = document.getElementById('player');
-  if(!sprite || !player) return;
-  sprite.classList.remove('avatar-boy','avatar-girl');
-  sprite.classList.add(state.avatar === 'female' ? 'avatar-girl' : 'avatar-boy');
+  if(!player) return;
   player.dataset.avatar = state.avatar;
 }
 
@@ -284,6 +281,53 @@ function showIosInstallHint(){
 }
 showIosInstallHint();
 
+const TILE = 16;
+const SPRITE_H = 24;
+
+function pixelScale(){
+  return parseInt(getComputedStyle(document.documentElement)
+    .getPropertyValue('--px'), 10) || 3;
+}
+
+function tileVariant(r, c, n){
+  return ((r * 73856093) ^ (c * 19349663)) % n;
+}
+
+function pathEdges(r, c){
+  const isPath = (rr, cc) => {
+    if(rr < 0 || rr >= ROWS || cc < 0 || cc >= COLS) return true;
+    const v = MAP[rr][cc];
+    return v === '.' || (v && v[0] === 'N');
+  };
+  let s = '';
+  if(!isPath(r-1, c)) s += 'n';
+  if(!isPath(r+1, c)) s += 's';
+  if(!isPath(r, c+1)) s += 'e';
+  if(!isPath(r, c-1)) s += 'w';
+  const ok = ['n','s','e','w','ne','nw','se','sw','ns','ew'];
+  return ok.includes(s) ? 'edge-' + s : '';
+}
+
+function setPixelScale(){
+  const wrap = document.getElementById('mapWrap');
+  if(!wrap) return;
+  const avail = wrap.clientWidth - 28;
+  const byWidth  = Math.floor(avail / (TILE * VIEWPORT_COLS));
+  const byHeight = Math.floor((window.innerHeight * 0.46) / (TILE * VIEWPORT_ROWS));
+  const px = Math.max(2, Math.min(6, byWidth, byHeight));
+  document.documentElement.style.setProperty('--px', px);
+}
+window.addEventListener('resize', ()=>{ setPixelScale(); positionPlayer(); updateCamera(); });
+
+function showEncounterAlert(){
+  const player = document.getElementById('player');
+  if(!player) return;
+  const a = document.createElement('div');
+  a.className = 'encounter-alert';
+  player.appendChild(a);
+  setTimeout(()=> a.remove(), 700);
+}
+
 /* ================= MAP RENDER ================= */
 const mapGrid = document.getElementById('mapGrid');
 let mapWorld = null;
@@ -291,30 +335,8 @@ let tileEls = [];
 let slotTileEls = {};
 let trainerTileEls = {};
 
-function buildGrassBlades(tile){
-  const cluster = document.createElement('div');
-  cluster.className = 'blade-cluster';
-  const count = 6;
-  for(let i=0;i<count;i++){
-    const blade = document.createElement('div');
-    blade.className = 'blade ' + (i%2===0 ? 'b-l' : 'b-d');
-    const heightPct = 55 + Math.random()*35;
-    const rot = Math.round(Math.random()*18-9);
-    const leftPct = 6 + i*(88/(count-1)) + (Math.random()*6-3);
-    blade.style.height = heightPct+'%';
-    blade.style.left = leftPct+'%';
-    blade.style.setProperty('--r', rot+'deg');
-    blade.style.setProperty('--ad', (Math.random()*1.6).toFixed(2)+'s');
-    cluster.appendChild(blade);
-  }
-  tile.appendChild(cluster);
-  const star = document.createElement('div');
-  star.className = 'grass-star';
-  star.textContent = '⭐';
-  tile.appendChild(star);
-}
-
 function initMap(){
+  setPixelScale();
   mapGrid.innerHTML = '';
   tileEls = [];
   slotTileEls = {};
@@ -330,34 +352,32 @@ function initMap(){
       const val = MAP[r][c];
       const t = document.createElement('div');
       t.className = 'tile';
-      if(val==='#'){ t.classList.add('t-tree'); }
-      else if(val==='.'){ t.classList.add('t-path'); }
-      else if(val==='g'){ t.classList.add('t-grassbg'); }
-      else if(val==='h'){ t.classList.add('t-hill'); t.innerHTML='<span class="terrain-sprite"></span>'; }
-      else if(val==='w'){ t.classList.add('t-water'); t.innerHTML='<span class="terrain-sprite"></span>'; }
-      else if(val==='f'){ t.classList.add('t-flowers'); t.innerHTML='<span class="terrain-sprite"></span>'; }
-      else if(val==='t'){ t.classList.add('t-thicket'); t.innerHTML='<span class="terrain-sprite"></span>'; }
-      else if(val==='b'){ t.classList.add('t-bush'); t.innerHTML='<span class="terrain-sprite"></span>'; }
-      else if(val==='r'){ t.classList.add('t-rock'); t.innerHTML='<span class="terrain-sprite"></span>'; }
-      else if(val==='m'){ t.classList.add('t-mushroom'); t.innerHTML='<span class="terrain-sprite"></span>'; }
+      if(val==='#'){ t.classList.add('t-tree', 'v' + tileVariant(r,c,4)); }
+      else if(val=='.'){
+        t.classList.add('t-path');
+        if(tileVariant(r,c,2)) t.classList.add('v1');
+        const e = pathEdges(r,c);
+        if(e) t.classList.add(e);
+      }
+      else if(val==='g'){ t.classList.add('t-grassbg', 'v' + tileVariant(r,c,4)); }
+      else if(val==='h'){ t.classList.add('t-hill'); }
+      else if(val==='w'){ t.classList.add('t-water'); }
+      else if(val==='f'){ t.classList.add('t-flowers'); }
+      else if(val==='t'){ t.classList.add('t-thicket'); }
+      else if(val==='b'){ t.classList.add('t-bush'); }
+      else if(val==='r'){ t.classList.add('t-rock'); }
+      else if(val==='m'){ t.classList.add('t-mushroom'); }
       else if(val && val[0]==='S'){
         t.classList.add('t-grass');
         const slotIdx = +val.slice(1);
         t.dataset.slot = slotIdx;
-        buildGrassBlades(t);
+        t.style.animationDelay = (tileVariant(r,c,8) * 0.2).toFixed(1) + 's';
         slotTileEls[slotIdx] = t;
       }
       else if(val && val[0]==='N'){
         t.classList.add('t-guide');
         t.dataset.guide = val;
-        if(val === 'N1'){
-          t.classList.add('scholar-mei-tile');
-          t.innerHTML = '<span class="scholar-mei"><span class="mei-head"></span><span class="mei-hair"></span><span class="mei-eyes"></span><span class="mei-body"></span><span class="mei-hand"></span><span class="mei-legs"></span></span>';
-        }
-        if(val === 'N2'){
-          t.classList.add('scholar-zed-tile');
-          t.innerHTML = '<span class="scholar-zed"><span class="zed-head"></span><span class="zed-hair"></span><span class="zed-eyes"></span><span class="zed-body"></span><span class="zed-beard"></span><span class="zed-hand"></span><span class="zed-legs"></span></span>';
-        }
+        t.innerHTML = '<span class="npc"></span>';
       }
       mapWorld.appendChild(t);
       rowArr.push(t);
@@ -370,27 +390,14 @@ function initMap(){
     if(!tile) return;
     tile.className = 'tile t-trainer';
     tile.dataset.trainer = key;
+    tile.innerHTML = '<span class="npc"></span>';
     if(state.trainerBadges[key]) tile.classList.add('beaten');
     trainerTileEls[key] = tile;
   });
   const player = document.createElement('div');
   player.id = 'player';
-  const avatarClass = state.avatar === 'female' ? 'avatar-girl' : 'avatar-boy';
   player.dataset.avatar = state.avatar;
-  player.innerHTML = `<span class="sprite face-down ${avatarClass}">
-    <span class="avatar-body">
-      <span class="avatar-hair"></span>
-      <span class="avatar-head"></span>
-      <span class="avatar-eyes"></span>
-      <span class="avatar-arm left"></span>
-      <span class="avatar-arm right"></span>
-      <span class="avatar-torso"></span>
-      <span class="avatar-legs">
-        <span class="avatar-leg left"></span>
-        <span class="avatar-leg right"></span>
-      </span>
-    </span>
-  </span>`;
+  player.innerHTML = '<span class="sprite face-down"></span>';
   mapGrid.appendChild(player);
   positionPlayer();
   refreshCaughtTiles();
@@ -400,31 +407,25 @@ function initMap(){
 
 function positionPlayer(){
   const player = document.getElementById('player');
-  // Player is positioned relative to the viewport (mapGrid), not the world
+  if(!player) return;
+  const px = pixelScale();
   const midC = Math.floor(VIEWPORT_COLS/2);
   const midR = Math.floor(VIEWPORT_ROWS/2);
   const viewCol = Math.min(Math.max(state.pos.col - midC, 0), COLS - VIEWPORT_COLS);
   const viewRow = Math.min(Math.max(state.pos.row - midR, 0), ROWS - VIEWPORT_ROWS);
-  const tileWidth = 100/VIEWPORT_COLS;
-  const tileHeight = 100/VIEWPORT_ROWS;
-  const playerScale = 0.84;
-  const playerWidth = tileWidth * playerScale;
-  const playerHeight = tileHeight * playerScale;
-  player.style.left = (((state.pos.col - viewCol + 0.5) * tileWidth) - playerWidth/2) + '%';
-  player.style.top = (((state.pos.row - viewRow + 0.5) * tileHeight) - playerHeight/2) + '%';
-  player.style.width = playerWidth + '%';
-  player.style.height = playerHeight + '%';
+  player.style.left = ((state.pos.col - viewCol) * TILE * px) + 'px';
+  player.style.top  = (((state.pos.row - viewRow) * TILE) - (SPRITE_H - TILE)) * px + 'px';
 }
 
 function updateCamera(){
   if(!mapWorld) return;
+  const px = pixelScale();
   const midC = Math.floor(VIEWPORT_COLS/2);
   const midR = Math.floor(VIEWPORT_ROWS/2);
   const viewCol = Math.min(Math.max(state.pos.col - midC, 0), COLS - VIEWPORT_COLS);
   const viewRow = Math.min(Math.max(state.pos.row - midR, 0), ROWS - VIEWPORT_ROWS);
-  const shiftX = -(viewCol / COLS) * 100;
-  const shiftY = -(viewRow / ROWS) * 100;
-  mapWorld.style.transform = `translate(${shiftX}%, ${shiftY}%)`;
+  mapWorld.style.transform =
+    `translate(${-viewCol * TILE * px}px, ${-viewRow * TILE * px}px)`;
 }
 
 function refreshCaughtTiles(){
@@ -508,7 +509,8 @@ function tryMove(dx,dy){
       showDecoyRustle(slotIdx);
     } else if(!state.levelResolved[fid]){
       sfxEncounter();
-      startEncounter(fid);
+      showEncounterAlert();
+      setTimeout(()=> startEncounter(fid), 420);
     }
   } else if(val && val[0]==='N'){
     sfxGuide();
