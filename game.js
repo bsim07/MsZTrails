@@ -25,6 +25,8 @@ const state = {
   muted:false,
   playerName:"",
   storageKey:"",
+  classCode:"",
+  studentId:"",
   avatar:"male",
 };
 
@@ -746,6 +748,10 @@ function handleAnswer(idx, f){
     state.records[f.id].wrongAttempts = (state.records[f.id].wrongAttempts||0) + 1;
     Rarity.record(f.id, false, false);
     state.battle.wrongCount++;
+    state.records[f.id].yourAnswer = f.options[idx];
+    state.records[f.id].correctAnswer = f.options[f.correct];
+    state.records[f.id].attempts = state.battle.wrongCount;
+    state.records[f.id].neededHint = true;
     state.streak = 0;
     updateStreakUI();
     if(state.battle.wrongCount>=1){
@@ -753,6 +759,7 @@ function handleAnswer(idx, f){
     }
     setTimeout(()=>{ opts.forEach((b,i)=>{ if(i!==idx){ b.disabled=false; } b.classList.remove('wrong'); }); }, 700);
   }
+  saveProgress();
 }
 
 function updateStreakUI(){
@@ -1022,6 +1029,7 @@ function finishTrainerBattle(){
     };
     sfxBadge();
   }
+  saveProgress();
   const missedHtml = tb.missed.length ? `
     <div class="reflect-title" style="text-align:left;margin-top:14px;">Worth a second look</div>
     ${tb.missed.slice(0,3).map(f=>`
@@ -1152,7 +1160,10 @@ function exitNoteHtml(){
 }
 function wireExitNote(){
   const box = document.getElementById('exitNoteBox');
-  if(box) box.addEventListener('input', ()=>{ state.exitNote = box.value; });
+  if(box){
+    box.maxLength = 1000;
+    box.addEventListener('input', ()=>{ state.exitNote = box.value; saveProgress(); });
+  }
 }
 
 function resetToFreshGame(){
@@ -1173,6 +1184,9 @@ function resetToFreshGame(){
   updateProgress();
   updateStreakUI();
   closeModal();
+  state.storageKey = 'ft_response:' + slugify(state.playerName) + '_' + Math.random().toString(36).slice(2,10);
+  if(window.FTCloud && FTCloud.configured) FTCloud.startSession(state.classCode, state.studentId);
+  saveProgress();
 }
 
 function renderLevelComplete(level){
@@ -1261,6 +1275,7 @@ function renderBonusChoice(){
     initMap();
     updateProgress();
     const msgs = {new:'New Territory unlocked — 6 fresh Fractlings await! 🌟', review:'Rematch Trail begins — time to conquer your trickiest ones! 🔁', mixed:'Bonus Round begins! New Fractlings + your trickiest rematches. 🌟'};
+    saveProgress();
     toast(msgs[mode]);
   };
   document.getElementById('modeNew').addEventListener('click', ()=>go('new'));
@@ -1274,6 +1289,7 @@ function startBossBattle(){
   state.bossBattle = {qIndex:0, correctCount:0, questions: shuffleArray([...BOSS_POOL]).slice(0,6), missed:[]};
   updateProgress();
   renderBossIntro();
+  saveProgress();
 }
 
 function renderBossIntro(){
@@ -1418,6 +1434,10 @@ function buildProgressPayload(){
     level: state.level,
     bossPassed: state.bossPassed,
     caughtCount: Object.keys(state.caught).length,
+    roundCaught: Object.keys(state.levelResolved).length,
+    roundTarget: state.sessionFractlingIds.length,
+    bossCorrect: state.bossBattle ? state.bossBattle.correctCount : 0,
+    bossTotal: state.bossBattle ? state.bossBattle.questions.length : 0,
     trainerBadges: Object.keys(state.trainerBadges),
     bestStreak: state.bestStreak,
     exitNote: state.exitNote,
@@ -1431,7 +1451,7 @@ function buildProgressPayload(){
         correctAnswer: r.correctAnswer,
         attempts: r.attempts,
         wrongAttempts: r.wrongAttempts||0,
-        correct: r.correctAnswer === r.yourAnswer,
+        correct: typeof r.correctAnswer === 'string' && typeof r.yourAnswer === 'string' && r.correctAnswer === r.yourAnswer,
         neededHint: r.neededHint,
         strategy: r.strategy,
         confidence: r.confidence
@@ -1445,6 +1465,7 @@ async function saveProgress(){
   if(state.storageKey){
     try{ localStorage.setItem(state.storageKey, JSON.stringify(payload)); }catch(e){}
   }
+  if(window.FTCloud) FTCloud.enqueue(payload);
   if(typeof window.storage === 'undefined') return;
   try{
     await window.storage.set(state.storageKey, JSON.stringify(payload), true);
@@ -1475,6 +1496,10 @@ async function renderDashboard(){
 }
 
 async function renderTeacherPage(){
+  if(window.FTCloud && FTCloud.configured){
+    renderCloudTeacherPage();
+    return;
+  }
   document.body.classList.add('teacher-mode');
   const app = document.getElementById('app');
   app.innerHTML = `
@@ -1788,6 +1813,15 @@ function renderExportModal(){
 
 /* ================= START / INIT ================= */
 function initFractionTrails(){
+if(window.FTCloud && FTCloud.configured){
+  document.getElementById('classJoin').classList.remove('hidden');
+  document.getElementById('cloudSyncBar').classList.remove('hidden');
+  const syncStatus = document.getElementById('cloudSyncStatus');
+  syncStatus.textContent = FTCloud.getStatus();
+  window.addEventListener('ft-sync-status', e=>{ syncStatus.textContent = e.detail; });
+  document.getElementById('cloudRetryBtn').addEventListener('click', ()=>FTCloud.retry());
+  document.getElementById('classCodeInput').value = new URLSearchParams(location.search).get('class') || '';
+}
 document.getElementById('startBtn').addEventListener('click', ()=>{
   const nameInput = document.getElementById('nameInput');
   const rawName = nameInput.value.trim();
@@ -1798,6 +1832,21 @@ document.getElementById('startBtn').addEventListener('click', ()=>{
     return;
   }
   nameInput.setCustomValidity('');
+  if(window.FTCloud && FTCloud.configured){
+    const classInput = document.getElementById('classCodeInput');
+    const studentInput = document.getElementById('studentIdInput');
+    for(const [input, pattern, message] of [
+      [classInput,/^[A-Z0-9_-]{1,32}$/,'Enter the class code from your teacher.'],
+      [studentInput,/^[A-Z0-9_-]{1,24}$/,'Enter your student ID using letters, numbers, hyphens or underscores.']
+    ]){
+      input.value = input.value.trim().toUpperCase();
+      input.setCustomValidity(pattern.test(input.value) ? '' : message);
+      if(!input.checkValidity()){ input.reportValidity(); input.focus(); return; }
+    }
+    state.classCode = classInput.value;
+    state.studentId = studentInput.value;
+    FTCloud.startSession(state.classCode, state.studentId);
+  }
   state.playerName = rawName;
   state.storageKey = 'ft_response:' + slugify(state.playerName) + '_' + Math.random().toString(36).slice(2,6);
   document.getElementById('screen-title').classList.add('hidden');

@@ -30,7 +30,7 @@
    only thing standing between a child and a broken page, but do it anyway.
    ========================================================================= */
 
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 const CACHE_NAME = `fraction-trails-${CACHE_VERSION}`;
 
 // Fetched on install so the game works offline from the first visit.
@@ -40,6 +40,9 @@ const PRECACHE = [
   './styles.css',
   './data.js',
   './utils.js',
+  './cloud-config.js',
+  './cloud-sync.js',
+  './cloud-dashboard.js',
   './game.js',
   './main.js',
   './tree.svg',

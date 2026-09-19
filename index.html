@@ -30,6 +30,13 @@
     <div id="titleScene"></div>
     <div class="title-critters" id="titleCritters"></div>
     <input id="nameInput" type="text" placeholder="Enter your first name" maxlength="18" required aria-required="true">
+    <div id="classJoin" class="class-join hidden">
+      <label for="classCodeInput">Class code from your teacher</label>
+      <input id="classCodeInput" type="text" maxlength="32" autocomplete="off" autocapitalize="characters" placeholder="e.g. FT-1234ABCD">
+      <label for="studentIdInput">Your student number or ID</label>
+      <input id="studentIdInput" type="text" maxlength="24" autocomplete="off" placeholder="e.g. 07">
+      <small>Use the same student ID each time so your teacher can find your results.</small>
+    </div>
     <br>
     <div id="avatarPicker" style="margin:14px 0 4px;">
       <div style="font-size:0.78em;font-weight:800;color:#F3FFE9;opacity:0.9;margin-bottom:8px;">
@@ -85,6 +92,10 @@
         <button id="muteBtn" title="Toggle sound">🔊</button>
         <button id="exportBtn" title="Export my results">📤</button>
       </div>
+      <div id="cloudSyncBar" class="cloud-sync-bar hidden">
+        <span id="cloudSyncStatus" role="status" aria-live="polite"></span>
+        <button id="cloudRetryBtn" type="button">Retry sync</button>
+      </div>
     </div>
     <div id="mapWrap">
       <div id="mapGrid"></div>
@@ -109,6 +120,9 @@
 <script src="data.js"></script>
 <script src="assets/rarity.js"></script>
 <script src="utils.js"></script>
+<script src="cloud-config.js"></script>
+<script src="cloud-sync.js"></script>
+<script src="cloud-dashboard.js"></script>
 <script src="game.js"></script>
 <script src="main.js"></script>
 
