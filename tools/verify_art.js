@@ -42,6 +42,10 @@ const check = (name, pass, detail = '') =>
   await page.click('.avatar-btn[data-avatar="male"]');
 
   await page.fill('#nameInput', 'Test');
+  if (await page.isVisible('#classCodeInput')) {
+    await page.fill('#classCodeInput', 'FT-TEST');
+    await page.fill('#studentIdInput', '01');
+  }
   await page.click('#startBtn');
   await page.waitForTimeout(1200);
 
@@ -168,6 +172,10 @@ const check = (name, pass, detail = '') =>
   await rm.goto(target);
   await rm.waitForTimeout(600);
   await rm.fill('#nameInput', 'Test');
+  if (await rm.isVisible('#classCodeInput')) {
+    await rm.fill('#classCodeInput', 'FT-TEST');
+    await rm.fill('#studentIdInput', '01');
+  }
   await rm.click('#startBtn');
   await rm.waitForTimeout(900);
   check('prefers-reduced-motion stops every animation',

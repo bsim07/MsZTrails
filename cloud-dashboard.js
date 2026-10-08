@@ -19,9 +19,18 @@
           </form>
           <p id="teacherConnectionHelp">Find both values on the private Sheet’s Connection tab. Share only the class code with students.</p>
           <div class="cloud-toolbar hidden" id="teacherCloudToolbar">
+            <button id="teacherCreateSession" type="button" class="btn-primary">Create game session</button>
             <button id="teacherCloudRefresh" type="button" class="btn-secondary">Refresh results</button>
             <button id="teacherCloudLock" type="button" class="btn-secondary">Lock dashboard</button>
             <span>Refreshes every 30 seconds while this tab is visible.</span>
+          </div>
+          <div id="teacherSessionPanel" class="session-panel hidden">
+            <h2>Join this class</h2>
+            <p>Students scan this QR code with their device camera. The class code is filled in for them; they only enter their name and student number.</p>
+            <div id="teacherSessionQr" class="session-qr" role="img" aria-label="QR code to join the class"></div>
+            <p>Class code: <b id="teacherSessionCode"></b></p>
+            <p class="session-link"><a id="teacherSessionLink" target="_blank" rel="noopener"></a></p>
+            <button id="teacherSessionHide" type="button" class="btn-secondary">Hide QR code</button>
           </div>
           <p id="teacherCloudStatus" role="status" aria-live="polite">Enter your class details to connect.</p>
           <div id="dashContent"></div>
@@ -35,7 +44,27 @@
     const content = document.getElementById('dashContent');
     const status = document.getElementById('teacherCloudStatus');
     const toolbar = document.getElementById('teacherCloudToolbar');
+    const sessionPanel = document.getElementById('teacherSessionPanel');
+    function hideSession(){
+      sessionPanel.classList.add('hidden');
+      document.getElementById('teacherSessionQr').replaceChildren();
+    }
+    function showSession(){
+      if(!credentials || typeof qrcode === 'undefined') return;
+      // Only the class code goes in the link; the teacher key never leaves this tab.
+      const url = location.href.split(/[?#]/)[0] + '?class=' + encodeURIComponent(credentials.classCode);
+      const qr = qrcode(0,'M');
+      qr.addData(url);
+      qr.make();
+      document.getElementById('teacherSessionQr').innerHTML = qr.createSvgTag({cellSize:6, margin:4, scalable:true});
+      document.getElementById('teacherSessionCode').textContent = credentials.classCode;
+      const link = document.getElementById('teacherSessionLink');
+      link.href = url;
+      link.textContent = url;
+      sessionPanel.classList.remove('hidden');
+    }
     function lock(){
+      hideSession();
       generation++;
       credentials = null;
       clearInterval(interval);
@@ -106,6 +135,8 @@
       credentials = {classCode:document.getElementById('teacherClassCode').value.trim().toUpperCase(),key:document.getElementById('teacherAccessKey').value.trim()};
       refresh();
     });
+    document.getElementById('teacherCreateSession').addEventListener('click',showSession);
+    document.getElementById('teacherSessionHide').addEventListener('click',hideSession);
     document.getElementById('teacherCloudRefresh').addEventListener('click',refresh);
     document.getElementById('teacherCloudLock').addEventListener('click',()=>{ lock(); interval = null; });
     global.addEventListener('pagehide',lock,{once:true});

@@ -30,7 +30,7 @@
    only thing standing between a child and a broken page, but do it anyway.
    ========================================================================= */
 
-const CACHE_VERSION = 'v6';
+const CACHE_VERSION = 'v7';
 const CACHE_NAME = `fraction-trails-${CACHE_VERSION}`;
 
 // Fetched on install so the game works offline from the first visit.
@@ -61,6 +61,7 @@ const PRECACHE = [
   ,'./assets/fractlings.png'
   ,'./assets/fractlings.css'
   ,'./assets/rarity.js'
+  ,'./assets/qrcode.js'
 ];
 
 // Code has to be current; assets only have to be recent.

@@ -753,6 +753,10 @@
   .cloud-connect label{flex:1 1 220px;font-weight:800;}
   .cloud-connect input{display:block;margin-top:6px;}
   .cloud-toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+  .session-panel{background:#fff;border:2px solid #D7E6D9;border-radius:14px;padding:16px 20px;margin:16px 0;text-align:center;}
+  .session-qr{display:inline-block;width:260px;max-width:100%;border:8px solid #fff;border-radius:8px;}
+  .session-qr svg{display:block;width:100%;height:auto;}
+  .session-link{overflow-wrap:anywhere;font-size:.85em;}
   .student-details{background:#fff;border:1px solid #D7E6D9;border-radius:10px;margin:12px 0;padding:14px;overflow-wrap:anywhere;}
   .student-details summary{cursor:pointer;font-weight:800;min-height:32px;}
   .cloud-record{border-top:1px solid #D7E6D9;padding-top:12px;margin-top:12px;}

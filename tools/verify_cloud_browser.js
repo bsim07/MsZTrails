@@ -80,6 +80,18 @@ const server=http.createServer((req,res)=>{
     check('independent teacher browser sees student', (await dashboard.locator('.dash-table').textContent()).includes('Ada'));
     check('teacher key absent from storage and URL',await dashboard.evaluate(()=>!JSON.stringify(localStorage).includes('private-test-key')&&!JSON.stringify(sessionStorage).includes('private-test-key')&&!location.href.includes('private-test-key')));
 
+    check('session panel hidden until requested',await dashboard.locator('#teacherSessionPanel').isHidden());
+    await dashboard.click('#teacherCreateSession');
+    check('create session shows a QR code',await dashboard.locator('#teacherSessionQr svg').count()===1);
+    const joinUrl=await dashboard.locator('#teacherSessionLink').getAttribute('href');
+    check('QR link carries the class code but never the teacher key',joinUrl===origin+'/?class=FT-TEST' && !joinUrl.includes('private-test-key'));
+    const joinPage=await student.newPage();joinPage.on('pageerror',e=>errors.push(e.message));
+    await joinPage.goto(joinUrl);
+    check('scanned link pre-fills the class code',await joinPage.inputValue('#classCodeInput')==='FT-TEST');
+    await joinPage.close();
+    await dashboard.click('#teacherSessionHide');
+    check('hiding the session clears the QR code',await dashboard.locator('#teacherSessionQr svg').count()===0);
+
     await page.evaluate(()=>cloudTest.startEncounter(0));
     await page.locator('#optionsWrap button').nth(1).click();
     await page.waitForFunction(()=>FTCloud.getStatus().startsWith('Synced'));
