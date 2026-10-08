@@ -93,11 +93,12 @@ const server=http.createServer((req,res)=>{
     check('hiding the session clears the QR code',await dashboard.locator('#teacherSessionQr svg').count()===0);
 
     await page.evaluate(()=>cloudTest.startEncounter(0));
-    await page.locator('#optionsWrap button').nth(1).click();
+    const correctIdx=await page.evaluate(()=>cloudTest.state.battle.question.correct);
+    await page.locator('#optionsWrap button').nth(correctIdx === 0 ? 1 : 0).click();
     await page.waitForFunction(()=>FTCloud.getStatus().startsWith('Synced'));
     const wrongRecord=JSON.parse(backend.rows[0][20]).records[0];
     check('wrong answer syncs as incorrect with hint and attempt count',wrongRecord.correct===false && wrongRecord.wrongAttempts===1 && wrongRecord.neededHint===true);
-    await page.locator('#optionsWrap button').first().click();
+    await page.locator('#optionsWrap button').nth(correctIdx).click();
     await page.locator('#stratList button').first().waitFor();
     await page.locator('#stratList button').first().click();await page.locator('#confRow button').last().click();await page.click('#catchBtn');
     await page.waitForFunction(()=>cloudTest.state.caught[0]===true);

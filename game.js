@@ -11,6 +11,7 @@ const state = {
   sessionFractlingIds:[], // this LEVEL's 10 target Fractlings
   level1TargetIds:[],  // remembered so Level 2 can mix in unused ones + rematches
   levelResolved:{},    // fractlingId -> true, reset every level (drives progress bar + tile look)
+  questionCache:{},    // fractlingId -> this level's generated question, so reopening a battle keeps it
   level:1,             // 1 = Explore, 2 = Bonus Round, 3 = Boss Battle
   focusTags:[],        // optional: tags the player chose to focus on for Level 1
   bossBattle:null,      // {qIndex, correctCount, questions, missed}
@@ -67,6 +68,7 @@ function assignSlots(mode){
   state.rarityByFractling = Rarity.assign(targetIds);
   Rarity.setSession(state.rarityByFractling);
   state.levelResolved = {};
+  state.questionCache = {};
 
   const allSlots = shuffleArray(Array.from({length:TOTAL_SLOTS}, (_,i)=>i));
   const filled = allSlots.slice(0, targetIds.length);
@@ -654,8 +656,9 @@ function openGuideDialog(key){
 
 /* ================= BATTLE ================= */
 function startEncounter(id){
-  const f = FRACTLINGS[id];
-  state.battle = {id, wrongCount:0};
+  if(!state.questionCache[id]) state.questionCache[id] = QuestionBank.build(FRACTLINGS[id]);
+  const f = state.questionCache[id];
+  state.battle = {id, wrongCount:0, question:f};
   renderBattleFight(f);
 }
 
@@ -912,7 +915,7 @@ function startTrainerBattle(key){
   if(state.trainerBattle) return;
   const t = TRAINERS[key];
   const pool = shuffleArray([...TRAINER_POOL]);
-  const qs = pool.slice(0,3);
+  const qs = pool.slice(0,3).map(q=> QuestionBank.build(q));
   state.trainerBattle = {key, qIndex:0, correctCount:0, questions:qs, wrongThisQ:0, missed:[]};
   renderTrainerIntro(key, t);
 }
@@ -1286,7 +1289,7 @@ function renderBonusChoice(){
 /* ================= BOSS BATTLE (Level 3) ================= */
 function startBossBattle(){
   state.level = 3;
-  state.bossBattle = {qIndex:0, correctCount:0, questions: shuffleArray([...BOSS_POOL]).slice(0,6), missed:[]};
+  state.bossBattle = {qIndex:0, correctCount:0, questions: shuffleArray([...BOSS_POOL]).slice(0,6).map(q=> QuestionBank.build(q)), missed:[]};
   updateProgress();
   renderBossIntro();
   saveProgress();
