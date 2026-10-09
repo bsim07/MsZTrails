@@ -12,6 +12,9 @@
   let timer;
   let failures = 0;
   let session = null;
+  // A stopped or archived session will not accept results, so retrying every few seconds is pointless.
+  const blocked = new Set();
+  const PERMANENT = ['closed', 'unknown'];
   let lastMessage = configured ? 'Waiting to start' : 'Results saved on this device';
   function readPending(){
     try {
@@ -38,6 +41,9 @@
     readPending();
     return Object.entries(queue).filter(([,e])=>e && e.endpoint === endpoint && e.body && e.body.sessionId);
   }
+  function active(){
+    return pending().filter(([key])=>!blocked.has(key));
+  }
   function schedule(delay){
     clearTimeout(timer);
     timer = setTimeout(flush, delay);
@@ -59,7 +65,11 @@
       let result;
       try { result = await response.json(); }
       catch(e){ throw new Error('Check the Apps Script deployment: execute as owner, access Anyone.'); }
-      if(!result || result.ok !== true) throw new Error(result && result.error || 'Google Sheets rejected the update.');
+      if(!result || result.ok !== true){
+        const failure = new Error(result && result.error || 'Google Sheets rejected the update.');
+        failure.code = result && result.code;
+        throw failure;
+      }
       return result;
     } finally { clearTimeout(timeout); }
   }
@@ -82,7 +92,7 @@
     schedule(1200);
   }
   async function flush(){
-    if(!configured || busy || !pending().length) return;
+    if(!configured || busy || !active().length) return;
     if(!navigator.onLine){
       status(durable ? 'Offline · saved on this device' : 'Offline · keep this tab open to preserve results');
       schedule(30000);
@@ -93,7 +103,7 @@
     status('Syncing with your teacher…');
     try {
       // Do not let one rejected class code prevent other sessions from syncing.
-      for(const [key, entry] of pending()){
+      for(const [key, entry] of active()){
         try {
           const result = await request(entry.body);
           if(result.sessionId !== entry.body.sessionId || !Number.isSafeInteger(result.revision) || result.revision < entry.body.revision){
@@ -105,22 +115,38 @@
             try { localStorage.removeItem(key); } catch(e){ /* A repeated save is idempotent. */ }
             delete queue[key];
           }
-        } catch(e){ failed = true; status('Not synced · ' + e.message); }
+        } catch(e){
+          if(PERMANENT.includes(e.code)){
+            blocked.add(key);
+            status('Not synced · ' + e.message + ' Your results are saved on this device.');
+          } else {
+            failed = true;
+            status('Not synced · ' + e.message);
+          }
+        }
       }
       if(!pending().length){
         failures = 0;
         status('Synced with your teacher at ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
-      } else if(!failed) status('New progress waiting to sync');
+      } else if(!failed && !blocked.size) status('New progress waiting to sync');
     } finally {
       busy = false;
-      if(pending().length) schedule(failed ? Math.min(120000, 5000 * Math.pow(2, failures++)) : 1200);
+      if(active().length) schedule(failed ? Math.min(120000, 5000 * Math.pow(2, failures++)) : 1200);
     }
   }
   global.addEventListener('online', ()=>schedule(0));
   global.FTCloud = {
-    configured, startSession, enqueue, retry:()=>schedule(0),
+    configured, startSession, enqueue, retry:()=>{ blocked.clear(); schedule(0); },
     getStatus:()=>lastMessage,
-    list:(classCode, teacherKey)=>request({action:'list', classCode:String(classCode).trim().toUpperCase(), teacherKey})
+    // Students: confirms a class code is open before they start playing.
+    check:classCode=>request({action:'check', classCode:String(classCode).trim().toUpperCase()}),
+    // Teacher actions: the key is sent only in the POST body and never stored.
+    list:(classCode, teacherKey)=>request({action:'list', classCode:String(classCode).trim().toUpperCase(), teacherKey}),
+    sessions:teacherKey=>request({action:'sessions', teacherKey}),
+    createSession:(teacherKey, name)=>request({action:'createSession', teacherKey, name}),
+    setStatus:(teacherKey, classCode, status)=>request({action:'setStatus', teacherKey, classCode, status}),
+    archive:(teacherKey, classCode)=>request({action:'archiveSession', teacherKey, classCode}),
+    restore:(teacherKey, classCode)=>request({action:'restoreSession', teacherKey, classCode})
   };
   if(configured && pending().length) schedule(1500);
 })(window);

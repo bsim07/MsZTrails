@@ -28,6 +28,8 @@ const check = (name, pass, detail = '') =>
   page.on('console', m => {
     if (m.type() === 'error' && !/net::/.test(m.text())) errors.push(m.text());
   });
+  // Never reach the real Google Sheets endpoint; the game starts offline.
+  await page.route('https://script.google.com/**', r => r.abort());
 
   await page.goto(target);
   await page.waitForTimeout(900);
@@ -47,6 +49,7 @@ const check = (name, pass, detail = '') =>
     await page.fill('#studentIdInput', '01');
   }
   await page.click('#startBtn');
+  await page.waitForSelector('#screen-game:not(.hidden)');
   await page.waitForTimeout(1200);
 
   // --- the invariant
@@ -169,6 +172,7 @@ const check = (name, pass, detail = '') =>
   // --- reduced motion
   const rm = await browser.newPage({ viewport: { width: 430, height: 900 } });
   await rm.emulateMedia({ reducedMotion: 'reduce' });
+  await rm.route('https://script.google.com/**', r => r.abort());
   await rm.goto(target);
   await rm.waitForTimeout(600);
   await rm.fill('#nameInput', 'Test');
@@ -177,6 +181,7 @@ const check = (name, pass, detail = '') =>
     await rm.fill('#studentIdInput', '01');
   }
   await rm.click('#startBtn');
+  await rm.waitForSelector('#screen-game:not(.hidden)');
   await rm.waitForTimeout(900);
   check('prefers-reduced-motion stops every animation',
     (await rm.$$eval('.t-grass, .t-water, #player .sprite',

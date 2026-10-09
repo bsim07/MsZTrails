@@ -30,7 +30,7 @@
    only thing standing between a child and a broken page, but do it anyway.
    ========================================================================= */
 
-const CACHE_VERSION = 'v8';
+const CACHE_VERSION = 'v9';
 const CACHE_NAME = `fraction-trails-${CACHE_VERSION}`;
 
 // Fetched on install so the game works offline from the first visit.

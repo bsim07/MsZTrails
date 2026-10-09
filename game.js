@@ -1816,6 +1816,7 @@ function renderExportModal(){
 
 /* ================= START / INIT ================= */
 function initFractionTrails(){
+const PERMANENT_JOIN_ERRORS = ['closed', 'unknown'];
 if(window.FTCloud && FTCloud.configured){
   document.getElementById('classJoin').classList.remove('hidden');
   document.getElementById('cloudSyncBar').classList.remove('hidden');
@@ -1824,6 +1825,22 @@ if(window.FTCloud && FTCloud.configured){
   window.addEventListener('ft-sync-status', e=>{ syncStatus.textContent = e.detail; });
   document.getElementById('cloudRetryBtn').addEventListener('click', ()=>FTCloud.retry());
   document.getElementById('classCodeInput').value = new URLSearchParams(location.search).get('class') || '';
+  document.getElementById('classCodeInput').addEventListener('input', e=>e.target.setCustomValidity(''));
+}
+function beginGame(rawName){
+  state.playerName = rawName;
+  state.storageKey = 'ft_response:' + slugify(state.playerName) + '_' + Math.random().toString(36).slice(2,6);
+  document.getElementById('screen-title').classList.add('hidden');
+  document.getElementById('screen-game').classList.remove('hidden');
+  regenerateLandscape();
+  state.pos = {...START};
+  assignSlots();
+  assignTrainerPositions();
+  initMap();
+  updateProgress();
+  updateStreakUI();
+  saveProgress();
+  startBackgroundMusic();
 }
 document.getElementById('startBtn').addEventListener('click', ()=>{
   const nameInput = document.getElementById('nameInput');
@@ -1846,23 +1863,28 @@ document.getElementById('startBtn').addEventListener('click', ()=>{
       input.setCustomValidity(pattern.test(input.value) ? '' : message);
       if(!input.checkValidity()){ input.reportValidity(); input.focus(); return; }
     }
-    state.classCode = classInput.value;
-    state.studentId = studentInput.value;
-    FTCloud.startSession(state.classCode, state.studentId);
+    const startBtn = document.getElementById('startBtn');
+    const startLabel = startBtn.textContent;
+    startBtn.disabled = true;
+    startBtn.textContent = 'Checking class…';
+    // Only a clear "closed" or "unknown code" answer stops the game; being offline must not.
+    FTCloud.check(classInput.value).then(()=>null, e=> PERMANENT_JOIN_ERRORS.includes(e.code) ? e : null).then(refusal=>{
+      startBtn.disabled = false;
+      startBtn.textContent = startLabel;
+      if(refusal){
+        classInput.setCustomValidity(refusal.message);
+        classInput.reportValidity();
+        classInput.focus();
+        return;
+      }
+      state.classCode = classInput.value;
+      state.studentId = studentInput.value;
+      FTCloud.startSession(state.classCode, state.studentId);
+      beginGame(rawName);
+    });
+    return;
   }
-  state.playerName = rawName;
-  state.storageKey = 'ft_response:' + slugify(state.playerName) + '_' + Math.random().toString(36).slice(2,6);
-  document.getElementById('screen-title').classList.add('hidden');
-  document.getElementById('screen-game').classList.remove('hidden');
-  regenerateLandscape();
-  state.pos = {...START};
-  assignSlots();
-  assignTrainerPositions();
-  initMap();
-  updateProgress();
-  updateStreakUI();
-  saveProgress();
-  startBackgroundMusic();
+  beginGame(rawName);
 });
 
 document.getElementById('exportBtn').addEventListener('click', renderExportModal);

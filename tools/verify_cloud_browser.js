@@ -72,25 +72,31 @@ const server=http.createServer((req,res)=>{
 
     const dashboard=await teacher.newPage();dashboard.on('pageerror',e=>errors.push(e.message));
     await dashboard.goto(origin+'/?teacher=dashboard');
-    await dashboard.fill('#teacherClassCode','FT-TEST');await dashboard.fill('#teacherAccessKey','wrong-key');await dashboard.click('#teacherConnectForm button');
+    await dashboard.fill('#teacherAccessKey','wrong-key');await dashboard.click('#teacherConnectForm button');
     await dashboard.waitForFunction(()=>document.getElementById('teacherCloudStatus').textContent.includes('Incorrect'));
-    check('wrong key reveals no student results',!(await dashboard.locator('#dashContent').textContent()).includes('Ada'));
+    check('wrong key reveals no sessions or student results',!(await dashboard.locator('#dashContent').textContent()).includes('Ada') && await dashboard.locator('#teacherSessions').isHidden());
     await dashboard.fill('#teacherAccessKey','private-test-key');await dashboard.click('#teacherConnectForm button');
-    await dashboard.locator('.dash-table').waitFor();
-    check('independent teacher browser sees student', (await dashboard.locator('.dash-table').textContent()).includes('Ada'));
+    await dashboard.locator('#teacherSessionList .session-table').waitFor();
+    check('the class from the single-class version appears as an open session',(await dashboard.locator('#teacherSessionList tr[data-code="FT-TEST"]').textContent()).includes('Open'));
+    await dashboard.click('#teacherSessionList tr[data-code="FT-TEST"] button[data-action="results"]');
+    await dashboard.locator('#dashContent .dash-table').waitFor();
+    check('independent teacher browser sees student', (await dashboard.locator('#dashContent .dash-table').textContent()).includes('Ada'));
     check('teacher key absent from storage and URL',await dashboard.evaluate(()=>!JSON.stringify(localStorage).includes('private-test-key')&&!JSON.stringify(sessionStorage).includes('private-test-key')&&!location.href.includes('private-test-key')));
 
-    check('session panel hidden until requested',await dashboard.locator('#teacherSessionPanel').isHidden());
-    await dashboard.click('#teacherCreateSession');
-    check('create session shows a QR code',await dashboard.locator('#teacherSessionQr svg').count()===1);
+    check('QR panel hidden until requested',await dashboard.locator('#teacherSessionPanel').isHidden());
+    await dashboard.click('#teacherSessionList tr[data-code="FT-TEST"] button[data-action="qr"]');
+    check('QR button shows a QR code',await dashboard.locator('#teacherSessionQr svg').count()===1);
     const joinUrl=await dashboard.locator('#teacherSessionLink').getAttribute('href');
     check('QR link carries the class code but never the teacher key',joinUrl===origin+'/?class=FT-TEST' && !joinUrl.includes('private-test-key'));
     const joinPage=await student.newPage();joinPage.on('pageerror',e=>errors.push(e.message));
     await joinPage.goto(joinUrl);
     check('scanned link pre-fills the class code',await joinPage.inputValue('#classCodeInput')==='FT-TEST');
+    await joinPage.fill('#nameInput','Wrong');await joinPage.fill('#classCodeInput','ft-nope');await joinPage.fill('#studentIdInput','99');await joinPage.click('#startBtn');
+    await joinPage.waitForFunction(()=>document.getElementById('classCodeInput').validationMessage.includes('class code'));
+    check('an unknown class code cannot start a game',await joinPage.locator('#screen-title').isVisible() && !backend.rows.some(r=>r[1]==='99'));
     await joinPage.close();
     await dashboard.click('#teacherSessionHide');
-    check('hiding the session clears the QR code',await dashboard.locator('#teacherSessionQr svg').count()===0);
+    check('hiding the QR panel clears the QR code',await dashboard.locator('#teacherSessionQr svg').count()===0);
 
     await page.evaluate(()=>cloudTest.startEncounter(0));
     const correctIdx=await page.evaluate(()=>cloudTest.state.battle.question.correct);
@@ -106,7 +112,7 @@ const server=http.createServer((req,res)=>{
     check('catch updates existing row with reflection',backend.rows.length===1 && JSON.parse(backend.rows[0][20]).records[0].confidence==='Very sure');
     await dashboard.click('#teacherCloudRefresh');await dashboard.waitForFunction(()=>document.querySelector('.cloud-record')?.textContent.includes('Very sure'));
     check('teacher receives caught progress and strategy', (await dashboard.locator('.cloud-record').textContent()).includes('counted'));
-    await dashboard.locator('.student-details summary').click();
+    await dashboard.locator('#dashContent .student-details summary').click();
     await dashboard.screenshot({path:path.join(root,'test-results/cloud-teacher.png'),fullPage:true});
 
     // A failed request must remain queued, including across closing and reopening the page.
@@ -136,9 +142,10 @@ const server=http.createServer((req,res)=>{
     await dashboard.click('#teacherCloudRefresh');await dashboard.waitForFunction(()=>document.querySelector('.dash-table').textContent.includes('<img'));
     check('remote text is escaped in dashboard',await dashboard.locator('#dashContent img').count()===0);
     await dashboard.click('#teacherCloudLock');
-    check('locking removes results and password field contents',await dashboard.locator('#dashContent').textContent()==='' && await dashboard.inputValue('#teacherAccessKey')==='');
-    await dashboard.fill('#teacherClassCode','FT-TEST');await dashboard.fill('#teacherAccessKey','private-test-key');await dashboard.click('#teacherConnectForm button');await dashboard.locator('.dash-table').waitFor();
-    check('dashboard reconnects after locking',await dashboard.locator('.dash-table tbody tr').count()===2);
+    check('locking removes sessions, results and password field contents',await dashboard.locator('#dashContent').textContent()==='' && await dashboard.locator('#teacherSessionList').textContent()==='' && await dashboard.inputValue('#teacherAccessKey')==='');
+    await dashboard.fill('#teacherAccessKey','private-test-key');await dashboard.click('#teacherConnectForm button');await dashboard.locator('#teacherSessionList .session-table').waitFor();
+    await dashboard.click('#teacherSessionList tr[data-code="FT-TEST"] button[data-action="results"]');await dashboard.locator('#dashContent .dash-table').waitFor();
+    check('dashboard reconnects after locking',await dashboard.locator('#dashContent .dash-table tbody tr').count()===2);
     rejectStudent=true;
     const otherTab=await student.newPage();await otherTab.goto(origin);
     await student.setOffline(true);
@@ -154,6 +161,63 @@ const server=http.createServer((req,res)=>{
     await student.setOffline(false);
     page=await student.newPage();await page.goto(origin);await page.waitForFunction(()=>FTCloud.getStatus().startsWith('Synced'));
     check('closing and reopening tabs preserves both unsent sessions',backend.rows.length===3 && JSON.parse(backend.rows[1][20]).caughtCount===4 && JSON.parse(backend.rows[2][20]).name==='Cara');
+
+    // Several classes: create a session, join by its QR link, stop and start it, archive and restore it.
+    const rowFor=code=>`#teacherSessionList tr[data-code="${code}"]`;
+    const badge=code=>dashboard.locator(rowFor(code)+' .status-badge').textContent();
+    await dashboard.fill('#teacherNewSessionName','3B Fractions');await dashboard.click('#teacherCreateForm button');
+    await dashboard.locator('#teacherSessionPanel').waitFor({state:'visible'});
+    const newCode=(await dashboard.locator('#teacherSessionCode').textContent()).trim();
+    const newUrl=await dashboard.locator('#teacherSessionLink').getAttribute('href');
+    check('creating a session shows its own class code and QR code',/^FT-[A-F0-9]{8}$/.test(newCode) && newCode!=='FT-TEST' && await dashboard.locator('#teacherSessionQr svg').count()===1 && newUrl===origin+'/?class='+newCode);
+    check('new session is listed as open and named',(await dashboard.locator(rowFor(newCode)).textContent()).includes('3B Fractions') && await badge(newCode)==='Open');
+
+    const joiner=await student.newPage();joiner.on('pageerror',e=>errors.push(e.message));
+    await joiner.goto(newUrl);
+    check('the QR link fills in the class code',await joiner.inputValue('#classCodeInput')===newCode);
+    await joiner.fill('#nameInput','Cleo');await joiner.fill('#studentIdInput','21');await joiner.click('#startBtn');
+    await joiner.waitForFunction(()=>document.getElementById('cloudSyncStatus').textContent.startsWith('Synced'));
+    check('a student joins the new session by entering only a name and number',backend.dataRows('Progress').some(r=>r[0]===newCode && r[1]==='21'));
+    await dashboard.click('#teacherCloudRefresh');
+    await dashboard.waitForFunction(()=>document.querySelector('#dashContent .dash-table')?.textContent.includes('Cleo'));
+    check('each session shows only its own students',!(await dashboard.locator('#dashContent').textContent()).includes('Ada'));
+
+    await dashboard.click(rowFor(newCode)+' button[data-action="toggle"]');
+    await dashboard.waitForFunction(code=>document.querySelector(`#teacherSessionList tr[data-code="${code}"] .status-badge`)?.textContent==='Stopped',newCode);
+    check('stopping hides the QR code and removes the QR button',await dashboard.locator('#teacherSessionPanel').isHidden() && await dashboard.locator(rowFor(newCode)+' button[data-action="qr"]').count()===0);
+    const late=await student.newPage();late.on('pageerror',e=>errors.push(e.message));
+    await late.goto(newUrl);await late.fill('#nameInput','Dan');await late.fill('#studentIdInput','22');await late.click('#startBtn');
+    await late.waitForFunction(()=>document.getElementById('classCodeInput').validationMessage.includes('closed'));
+    check('a stopped session turns new students away',await late.locator('#screen-title').isVisible() && !backend.dataRows('Progress').some(r=>r[1]==='22'));
+    await late.close();
+    await joiner.evaluate(()=>FTCloud.enqueue({name:'Cleo',caughtCount:2,records:[]}));
+    await joiner.waitForFunction(()=>document.getElementById('cloudSyncStatus').textContent.includes('closed by your teacher'));
+    check('a student already playing is told the session stopped and keeps their results on the device',
+      (await joiner.locator('#cloudSyncStatus').textContent()).includes('saved on this device') && JSON.parse(backend.dataRows('Progress').find(r=>r[1]==='21')[20]).caughtCount!==2 &&
+      await joiner.evaluate(()=>Object.keys(localStorage).some(k=>k.startsWith('ft_sheets_pending_v1:'))));
+
+    await dashboard.click(rowFor(newCode)+' button[data-action="toggle"]');
+    await dashboard.waitForFunction(code=>document.querySelector(`#teacherSessionList tr[data-code="${code}"] .status-badge`)?.textContent==='Open',newCode);
+    await joiner.click('#cloudRetryBtn');
+    await joiner.waitForFunction(()=>document.getElementById('cloudSyncStatus').textContent.startsWith('Synced'));
+    check('starting the session again lets the saved results sync',JSON.parse(backend.dataRows('Progress').find(r=>r[1]==='21')[20]).caughtCount===2);
+
+    dashboard.once('dialog',d=>d.dismiss());
+    await dashboard.click(rowFor(newCode)+' button[data-action="archive"]');
+    await dashboard.waitForTimeout(300);
+    check('cancelling the archive prompt changes nothing',await dashboard.locator(rowFor(newCode)).count()===1 && backend.dataRows('Archive').length===0);
+    dashboard.once('dialog',d=>d.accept());
+    await dashboard.click(rowFor(newCode)+' button[data-action="archive"]');
+    await dashboard.waitForFunction(code=>!document.querySelector(`#teacherSessionList tr[data-code="${code}"]`),newCode);
+    check('archiving moves the results to the Archive tab and off the active list',backend.dataRows('Archive').some(r=>r[0]===newCode && r[1]==='21') && !backend.dataRows('Progress').some(r=>r[0]===newCode) && (await dashboard.locator('#teacherArchivedSummary').textContent()).includes('(1)'));
+    check('archiving one class leaves the others and the open results view alone',backend.dataRows('Progress').filter(r=>r[0]==='FT-TEST').length===3 && await dashboard.locator('#dashContent').textContent()==='');
+    await joiner.close();
+
+    await dashboard.click('#teacherArchivedSummary');
+    await dashboard.click(`#teacherArchivedList tr[data-code="${newCode}"] button[data-action="restore"]`);
+    await dashboard.waitForFunction(code=>document.querySelector(`#teacherSessionList tr[data-code="${code}"]`),newCode);
+    check('restoring brings the session back stopped, with its results',await badge(newCode)==='Stopped' && backend.dataRows('Archive').length===0 && backend.dataRows('Progress').some(r=>r[0]===newCode && r[1]==='21'));
+    check('no spreadsheet formula was ever written',backend.formulaWrites.length===0);
     check('no browser runtime errors',errors.length===0);
     console.log(`${checks}/${checks} cloud browser checks passed (${submitCount} submission attempts)`);
   } finally {
